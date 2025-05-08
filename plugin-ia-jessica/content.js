@@ -88,7 +88,7 @@ function createButton() {
   
   // Criar imagem GIF para substituir no hover
   const catGif = document.createElement('img');
-  catGif.src = 'https://gabrielfrangetto.github.io/Pluginextras/OriginalNyan.gif';
+  catGif.src = 'https://gabrielfrangetto.github.io/Pluginextras/OriginalNyan-ezgif.com-webp-to-gif-converter.gif';
   catGif.style.width = '30px';
   catGif.style.height = '20px';
   catGif.style.display = 'none';
