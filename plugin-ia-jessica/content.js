@@ -62,14 +62,14 @@ function createButton() {
   // Criar imagem estática para o estado normal
   const catImage = document.createElement('img');
   catImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/pixelated-nyan-cat-2fvhnor9105pzhkp.png';
-  catImage.style.width = '30px';
-  catImage.style.height = '19px';
+  catImage.style.width = '45px';
+  catImage.style.height = '29px';
   
   // Adicionar imagem estática como filho do botão
   button.appendChild(catImage);
   
   // Definir tamanho padrão para o botão (consistente em todas as abas)
-  const BUTTON_SIZE = 50; // Tamanho em pixels
+  const BUTTON_SIZE = 75; // Tamanho em pixels
   
   button.style.position = 'fixed';
   button.style.bottom = '15px';
@@ -760,7 +760,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #fff;
+    background: #000000;
     border: 2px solid #000;
     border-radius: 12px;
     padding: 16px;
