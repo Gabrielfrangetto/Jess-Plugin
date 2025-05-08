@@ -166,6 +166,43 @@ function createButton() {
   // Atualizar posição inicial do handle
   setTimeout(updateHandlePosition, 100);
   
+  // Carregar posição salva do localStorage (se existir)
+  try {
+    const savedPosition = localStorage.getItem('nyanCatButtonPosition');
+    if (savedPosition) {
+      const position = JSON.parse(savedPosition);
+      button.style.left = position.left + 'px';
+      button.style.top = position.top + 'px';
+      button.style.right = 'auto';
+      button.style.bottom = 'auto';
+      
+      // Atualizar a posição do handle também
+      setTimeout(updateHandlePosition, 100);
+    }
+  } catch (e) {
+    console.error('Erro ao carregar posição do botão:', e);
+  }
+  
+  // Adicionar listener para o evento 'storage' para sincronizar entre abas
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'nyanCatButtonPosition') {
+      try {
+        const position = JSON.parse(e.newValue);
+        if (position) {
+          button.style.left = position.left + 'px';
+          button.style.top = position.top + 'px';
+          button.style.right = 'auto';
+          button.style.bottom = 'auto';
+          
+          // Atualizar a posição do handle também
+          updateHandlePosition();
+        }
+      } catch (e) {
+        console.error('Erro ao processar evento de storage:', e);
+      }
+    }
+  });
+  
   // --- LÓGICA DE ARRASTAR ---
   let isDragging = false;
   let dragStarted = false;
@@ -360,9 +397,9 @@ function createButton() {
       rgbIntervalId = null;
       
       // Adicionar transição para suavizar a mudança de cor
-      button.style.transition = 'background-color 0.5s ease, box-shadow 0.5s ease';
+      button.style.transition = 'background-color 0.5s ease, box-shadow 0.5s ease, transform 0.3s ease';
       
-      // Aplicar a cor final após um pequeno delay para permitir que a transição funcione
+      // Aplicar a cor final após um delay maior para permitir que a transição funcione
       setTimeout(() => {
         button.style.backgroundColor = '#007bff';
         button.style.boxShadow = 'none';
@@ -371,7 +408,7 @@ function createButton() {
         setTimeout(() => {
           button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease';
         }, 500);
-      }, 10);
+      }, 50); // Aumentado de 10ms para 50ms
     }
   }
   
