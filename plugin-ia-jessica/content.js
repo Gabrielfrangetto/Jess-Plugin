@@ -478,6 +478,8 @@ function createButton() {
 }
 
 async function sendToAI(text) {
+  console.log("🔄 Enviando para IA:", text); // Debug
+
   try {
     const response = await fetch('https://backend-plugin-ai.onrender.com/api', {
       method: 'POST',
@@ -487,19 +489,25 @@ async function sendToAI(text) {
       body: JSON.stringify({ text })
     });
 
+    console.log("📨 Status da resposta:", response.status);
+
     if (!response.ok) {
+      const erro = await response.text();
+      console.error("❌ Erro recebido:", erro);
       alert('Erro ao se conectar com a IA.');
       return null;
     }
 
     const data = await response.json();
+    console.log("✅ Resposta da IA:", data);
     return data.result.trim();
   } catch (error) {
-    console.error('Erro na comunicação com o servidor:', error);
+    console.error('⚠️ Erro na comunicação com o servidor:', error);
     alert('Ocorreu um erro ao processar sua solicitação.');
     return null;
   }
 }
+
 
 
 
