@@ -389,26 +389,24 @@ function createButton() {
   // Função para parar o efeito RGB com fade-out suave
   function stopRGBEffect() {
     if (rgbIntervalId) {
-      // Capturar a cor atual antes de parar o efeito
-      const currentColor = window.getComputedStyle(button).backgroundColor;
-      
       // Parar o efeito RGB
       clearInterval(rgbIntervalId);
       rgbIntervalId = null;
       
-      // Adicionar transição para suavizar a mudança de cor
+      // IMPORTANTE: Primeiro aplicar a transição ANTES de mudar a cor
       button.style.transition = 'background-color 0.5s ease, box-shadow 0.5s ease, transform 0.3s ease';
       
-      // Aplicar a cor final após um delay maior para permitir que a transição funcione
+      // Forçar um reflow para garantir que a transição seja aplicada
+      void button.offsetWidth;
+      
+      // Agora mudar a cor - a transição já está ativa
+      button.style.backgroundColor = '#007bff';
+      button.style.boxShadow = 'none';
+      
+      // Restaurar a transição original após o fade-out
       setTimeout(() => {
-        button.style.backgroundColor = '#007bff';
-        button.style.boxShadow = 'none';
-        
-        // Restaurar a transição original após o fade-out
-        setTimeout(() => {
-          button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease';
-        }, 500);
-      }, 50); // Aumentado de 10ms para 50ms
+        button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease';
+      }, 500);
     }
   }
   
