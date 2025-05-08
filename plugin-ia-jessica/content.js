@@ -103,6 +103,22 @@ function createButton() {
   // Adiciona o handle ao botão principal
   button.appendChild(dragHandle);
   
+  // --- CARREGAR POSIÇÃO SALVA DO LOCALSTORAGE ---
+  try {
+    const savedPosition = localStorage.getItem('nyanCatButtonPosition');
+    if (savedPosition) {
+      const position = JSON.parse(savedPosition);
+      if (position.left && position.top) {
+        button.style.left = position.left + 'px';
+        button.style.top = position.top + 'px';
+        button.style.right = 'auto';
+        button.style.bottom = 'auto';
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao carregar posição do botão:', e);
+  }
+  
   // --- LÓGICA DE ARRASTAR ---
   let isDragging = false;
   let dragStarted = false;
@@ -123,8 +139,11 @@ function createButton() {
   document.addEventListener('mousemove', function(e) {
     if (isDragging) {
       dragStarted = true;
-      button.style.left = (e.clientX - dragOffsetX) + 'px';
-      button.style.top = (e.clientY - dragOffsetY) + 'px';
+      const newLeft = e.clientX - dragOffsetX;
+      const newTop = e.clientY - dragOffsetY;
+      
+      button.style.left = newLeft + 'px';
+      button.style.top = newTop + 'px';
       button.style.right = 'auto';
       button.style.bottom = 'auto';
     }
@@ -134,6 +153,68 @@ function createButton() {
     if (isDragging) {
       isDragging = false;
       dragHandle.style.cursor = 'grab';
+      
+      // Salvar a posição atual no localStorage
+      if (dragStarted) {
+        try {
+          const rect = button.getBoundingClientRect();
+          const position = {
+            left: rect.left,
+            top: rect.top
+          };
+          localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
+        } catch (e) {
+          console.error('Erro ao salvar posição do botão:', e);
+        }
+      }
+    }
+  });
+  
+  // --- SUPORTE PARA TOUCH (DISPOSITIVOS MÓVEIS) ---
+  dragHandle.addEventListener('touchstart', function(e) {
+    isDragging = true;
+    dragStarted = false;
+    dragHandle.style.cursor = 'grabbing';
+    const rect = button.getBoundingClientRect();
+    const touch = e.touches[0];
+    dragOffsetX = touch.clientX - rect.left;
+    dragOffsetY = touch.clientY - rect.top;
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  
+  document.addEventListener('touchmove', function(e) {
+    if (isDragging) {
+      dragStarted = true;
+      const touch = e.touches[0];
+      const newLeft = touch.clientX - dragOffsetX;
+      const newTop = touch.clientY - dragOffsetY;
+      
+      button.style.left = newLeft + 'px';
+      button.style.top = newTop + 'px';
+      button.style.right = 'auto';
+      button.style.bottom = 'auto';
+    }
+  });
+  
+  document.addEventListener('touchend', function() {
+    if (isDragging) {
+      isDragging = false;
+      dragHandle.style.cursor = 'grab';
+      
+      // Salvar a posição atual no localStorage
+      if (dragStarted) {
+        try {
+          const rect = button.getBoundingClientRect();
+          const position = {
+            left: rect.left,
+            top: rect.top
+          };
+          localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
+        } catch (e) {
+          console.error('Erro ao salvar posição do botão:', e);
+        }
+      }
     }
   });
   
