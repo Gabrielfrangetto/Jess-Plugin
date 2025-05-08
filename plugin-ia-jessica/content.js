@@ -65,7 +65,7 @@ function createButton() {
   const catImage = document.createElement('img');
   catImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/pixelated-nyan-cat-2fvhnor9105pzhkp.png';
   catImage.style.width = '30px';
-  catImage.style.height = '20px';
+  catImage.style.height = '19px';
   
   // Adicionar imagem estática como filho do botão
   button.appendChild(catImage);
