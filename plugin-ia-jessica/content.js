@@ -103,7 +103,7 @@ function createButton() {
   const dragHandle = document.createElement('div');
   
   // Definir tamanho menor para o handle
-  const HANDLE_SIZE = 20; // Tamanho reduzido
+  const HANDLE_SIZE = 18; // Tamanho reduzido
   
   // Configurar estilos do handle
   dragHandle.style.position = 'absolute';
@@ -118,8 +118,21 @@ function createButton() {
   dragHandle.style.cursor = 'grab';
   dragHandle.style.zIndex = '10002';
   dragHandle.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
+  dragHandle.style.display = 'flex';
+  dragHandle.style.justifyContent = 'center';
+  dragHandle.style.alignItems = 'center';
   dragHandle.title = 'Arraste para mover';
-  dragHandle.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#888"/><path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+  
+  // Criar o SVG como um elemento separado para melhor controle
+  const svgContent = `
+    <svg width="${HANDLE_SIZE * 0.8}" height="${HANDLE_SIZE * 0.8}" viewBox="0 0 16 16" style="display: block;">
+      <circle cx="8" cy="8" r="7" fill="#888"/>
+      <path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  `;
+  
+  // Definir o conteúdo HTML do handle
+  dragHandle.innerHTML = svgContent;
   
   // Garantir que o handle não seja afetado por estilos externos
   dragHandle.setAttribute('style', 
@@ -135,7 +148,10 @@ function createButton() {
     'cursor: grab !important;' +
     'z-index: 10002 !important;' +
     'box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;' +
-    'pointer-events: auto !important;'); // Garantir que eventos de mouse funcionem
+    'pointer-events: auto !important;' +
+    'display: flex !important;' +
+    'justify-content: center !important;' +
+    'align-items: center !important;');
   
   // Adicionar o handle ao documento, não ao botão
   document.body.appendChild(dragHandle);
@@ -333,36 +349,29 @@ function createButton() {
     }, 50);
   }
   
-  // Função para parar o efeito RGB
+  // Função para parar o efeito RGB com fade-out suave
   function stopRGBEffect() {
     if (rgbIntervalId) {
-      // Não limpar o intervalo imediatamente, fazer fade-out
-      const fadeOutDuration = 500; // 500ms para o fade-out
-      const fadeOutSteps = 10; // Número de passos para o fade-out
-      const fadeOutInterval = fadeOutDuration / fadeOutSteps;
-      
-      // Salvar a cor atual
+      // Capturar a cor atual antes de parar o efeito
       const currentColor = window.getComputedStyle(button).backgroundColor;
-      const currentShadow = window.getComputedStyle(button).boxShadow;
       
       // Parar o efeito RGB
       clearInterval(rgbIntervalId);
       rgbIntervalId = null;
       
-      // Iniciar o fade-out
-      let step = 0;
-      const fadeOutId = setInterval(() => {
-        step++;
-        const opacity = 1 - (step / fadeOutSteps);
-        
-        // Aplicar fade-out na cor
+      // Adicionar transição para suavizar a mudança de cor
+      button.style.transition = 'background-color 0.5s ease, box-shadow 0.5s ease';
+      
+      // Aplicar a cor final após um pequeno delay para permitir que a transição funcione
+      setTimeout(() => {
         button.style.backgroundColor = '#007bff';
         button.style.boxShadow = 'none';
         
-        if (step >= fadeOutSteps) {
-          clearInterval(fadeOutId);
-        }
-      }, fadeOutInterval);
+        // Restaurar a transição original após o fade-out
+        setTimeout(() => {
+          button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease';
+        }, 500);
+      }, 10);
     }
   }
   
