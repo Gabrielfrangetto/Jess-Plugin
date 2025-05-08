@@ -14,8 +14,8 @@ function createButton() {
   completionImage.style.top = '50%';
   completionImage.style.left = '50%';
   completionImage.style.transform = 'translate(-50%, -50%)';
-  completionImage.style.width = '170px'; // Aumentado em 50% (de 150px para 225px)
-  completionImage.style.height = '170px'; // Aumentado em 50% (de 150px para 225px)
+  completionImage.style.width = '210px'; // Aumentado em 50% (de 150px para 225px)
+  completionImage.style.height = '210px'; // Aumentado em 50% (de 150px para 225px)
   completionImage.style.zIndex = '10001';
   completionImage.style.opacity = '0';
   completionImage.style.transition = 'opacity 1.0s ease-in-out'; // Aumentado o tempo de transição para um fade-in mais suave
