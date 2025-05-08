@@ -1,4 +1,4 @@
-// content.js
+s// content.js
 
 function createButton() {
   // Removida a verificação de URL para funcionar em qualquer site
@@ -518,7 +518,7 @@ async function checkForUpdate() {
   if (sessionStorage.getItem('updatePromptShown')) return;
 
   try {
-    const res = await fetch("https://backend-plugin-ai.onrender.com/version.json");
+    const res = await fetch("https://backend-plugin-ai.onrender.com/versionjess.json");
     const data = await res.json();
 
     if (compareVersions(data.version, currentVersion) > 0) {
