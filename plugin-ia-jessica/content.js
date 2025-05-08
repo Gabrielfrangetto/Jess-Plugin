@@ -701,7 +701,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #fff;
+    background: #000000;
     border: 2px solid #000;
     border-radius: 12px;
     padding: 16px;
