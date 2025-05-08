@@ -484,7 +484,10 @@ async function sendToAI(text) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({
+        text,
+        plugin: 'jessica' // 👈 altere aqui conforme o plugin
+      })
     });
 
     console.log("📨 Status da resposta:", response.status);
@@ -505,9 +508,6 @@ async function sendToAI(text) {
     return null;
   }
 }
-
-
-
 
 createButton();
 const currentVersion = chrome.runtime.getManifest().version;
