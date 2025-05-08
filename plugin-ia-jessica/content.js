@@ -14,8 +14,8 @@ function createButton() {
   completionImage.style.top = '50%';
   completionImage.style.left = '50%';
   completionImage.style.transform = 'translate(-50%, -50%)';
-  completionImage.style.width = '100%'; // Aumentado em 50% (de 150px para 225px)
-  completionImage.style.height = '100%'; // Aumentado em 50% (de 150px para 225px)
+  completionImage.style.minWidth = '100%'; // Aumentado em 50% (de 150px para 225px)
+  completionImage.style.minHeight = '100%'; // Aumentado em 50% (de 150px para 225px)
   completionImage.style.zIndex = '10001';
   completionImage.style.opacity = '0';
   completionImage.style.transition = 'opacity 1.0s ease-in-out'; // Aumentado o tempo de transição para um fade-in mais suave
@@ -62,8 +62,8 @@ function createButton() {
   // Criar imagem estática para o estado normal
   const catImage = document.createElement('img');
   catImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/pixelated-nyan-cat-2fvhnor9105pzhkp.png';
-  catImage.style.width = '30px';
-  catImage.style.height = '19px';
+  catImage.style.minWidth = '30px';
+  catImage.style.minHeight = '19px';
   
   // Adicionar imagem estática como filho do botão
   button.appendChild(catImage);
@@ -75,8 +75,8 @@ function createButton() {
   button.style.bottom = '15px';
   button.style.right = '15px';
   button.style.zIndex = 10000;
-  button.style.width = BUTTON_SIZE + 'px';
-  button.style.height = BUTTON_SIZE + 'px';
+  button.style.minWidth = BUTTON_SIZE + 'px';
+  button.style.minHeight = BUTTON_SIZE + 'px';
   button.style.borderRadius = '50%';
   button.style.backgroundColor = '#007bff';
   button.style.color = 'white';
@@ -93,8 +93,8 @@ function createButton() {
   dragHandle.style.top = '-12px';
   dragHandle.style.left = '50%';
   dragHandle.style.transform = 'translateX(-50%)';
-  dragHandle.style.width = '22px';
-  dragHandle.style.height = '22px';
+  dragHandle.style.minWidth = '22px';
+  dragHandle.style.minHeight = '22px';
   dragHandle.style.background = '#444';
   dragHandle.style.borderRadius = '50%';
   dragHandle.style.border = '2px solid #fff';
