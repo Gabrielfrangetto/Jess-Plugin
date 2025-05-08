@@ -541,7 +541,11 @@ function compareVersions(v1, v2) {
 }
 
 function showUpdatePrompt(version, changelog, downloadUrl) {
+  // Verifica se já existe o prompt e evita duplicação
+  if (document.getElementById("plugin-update-box")) return;
+
   const updateBox = document.createElement("div");
+  updateBox.id = "plugin-update-box"; // ID para controle
   updateBox.style = `
     position: fixed;
     bottom: 20px;
@@ -567,8 +571,10 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     </button>
   `;
 
+  // Adiciona corretamente ao body
   document.body.appendChild(updateBox);
 
+  // Ações dos botões
   document.getElementById("baixarAtualizacao").onclick = () => {
     window.open(downloadUrl, "_blank");
     updateBox.remove();
@@ -578,6 +584,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     updateBox.remove();
   };
 }
+
 
 // Inicia verificação ao carregar a página
 checkForUpdate();
