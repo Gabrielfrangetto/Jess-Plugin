@@ -119,6 +119,25 @@ function createButton() {
     console.error('Erro ao carregar posição do botão:', e);
   }
   
+  // --- ADICIONAR LISTENER PARA MUDANÇAS NO LOCALSTORAGE EM OUTRAS ABAS ---
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'nyanCatButtonPosition') {
+      try {
+        if (e.newValue) {
+          const position = JSON.parse(e.newValue);
+          if (position.left && position.top) {
+            button.style.left = position.left + 'px';
+            button.style.top = position.top + 'px';
+            button.style.right = 'auto';
+            button.style.bottom = 'auto';
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar posição do botão de outra aba:', error);
+      }
+    }
+  });
+  
   // --- LÓGICA DE ARRASTAR ---
   let isDragging = false;
   let dragStarted = false;
@@ -163,6 +182,31 @@ function createButton() {
             top: rect.top
           };
           localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
+          // Não é necessário disparar o evento storage manualmente,
+          // pois o navegador já faz isso automaticamente para outras abas
+        } catch (e) {
+          console.error('Erro ao salvar posição do botão:', e);
+        }
+      }
+    }
+  });
+  
+  // Mesmo para o evento touchend
+  document.addEventListener('touchend', function() {
+    if (isDragging) {
+      isDragging = false;
+      dragHandle.style.cursor = 'grab';
+      
+      // Salvar a posição atual no localStorage
+      if (dragStarted) {
+        try {
+          const rect = button.getBoundingClientRect();
+          const position = {
+            left: rect.left,
+            top: rect.top
+          };
+          localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
+          // O evento storage será disparado automaticamente para outras abas
         } catch (e) {
           console.error('Erro ao salvar posição do botão:', e);
         }
@@ -211,6 +255,7 @@ function createButton() {
             top: rect.top
           };
           localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
+          // O evento storage será disparado automaticamente para outras abas
         } catch (e) {
           console.error('Erro ao salvar posição do botão:', e);
         }
@@ -701,7 +746,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #000000;
+    background: #fff;
     border: 2px solid #000;
     border-radius: 12px;
     padding: 16px;
