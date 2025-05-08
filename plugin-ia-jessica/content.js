@@ -1,5 +1,3 @@
-s// content.js
-
 function createButton() {
   // Removida a verificação de URL para funcionar em qualquer site
   
