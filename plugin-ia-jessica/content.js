@@ -84,6 +84,59 @@ function createButton() {
   button.style.alignItems = 'center';
   button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease';
   
+  // --- HANDLE DE ARRASTAR ---
+  const dragHandle = document.createElement('div');
+  dragHandle.style.position = 'absolute';
+  dragHandle.style.top = '-12px';
+  dragHandle.style.left = '50%';
+  dragHandle.style.transform = 'translateX(-50%)';
+  dragHandle.style.width = '22px';
+  dragHandle.style.height = '22px';
+  dragHandle.style.background = '#444';
+  dragHandle.style.borderRadius = '50%';
+  dragHandle.style.border = '2px solid #fff';
+  dragHandle.style.cursor = 'grab';
+  dragHandle.style.zIndex = '10001';
+  dragHandle.title = 'Arraste para mover';
+  dragHandle.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#888"/><path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+  
+  // Adiciona o handle ao botão principal
+  button.appendChild(dragHandle);
+  
+  // --- LÓGICA DE ARRASTAR ---
+  let isDragging = false;
+  let dragStarted = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  
+  dragHandle.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    dragStarted = false;
+    dragHandle.style.cursor = 'grabbing';
+    const rect = button.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  
+  document.addEventListener('mousemove', function(e) {
+    if (isDragging) {
+      dragStarted = true;
+      button.style.left = (e.clientX - dragOffsetX) + 'px';
+      button.style.top = (e.clientY - dragOffsetY) + 'px';
+      button.style.right = 'auto';
+      button.style.bottom = 'auto';
+    }
+  });
+  
+  document.addEventListener('mouseup', function() {
+    if (isDragging) {
+      isDragging = false;
+      dragHandle.style.cursor = 'grab';
+    }
+  });
+  
   // Criar imagem GIF para substituir no hover
   const catGif = document.createElement('img');
   catGif.src = 'https://gabrielfrangetto.github.io/Pluginextras/OriginalNyan-ezgif.com-webp-to-gif-converter.gif';
@@ -176,7 +229,6 @@ function createButton() {
   });
   
   // Adicionando efeito de Imagens Flutuantes ao Clicar no Botão
-  
   function createFloatingImages() {
     // URLs das imagens
     const imageUrls = [
@@ -190,12 +242,12 @@ function createButton() {
     const buttonTop = buttonRect.top;
     const buttonLeft = buttonRect.left;
     
-    // Variável para controlar se o efeito está ativo
-    let isEffectActive = true;
+    // Variável global para controlar se o efeito está ativo
+    window.isEffectActive = true;
     
     // Função para criar uma única imagem flutuante
     function createSingleImage() {
-      if (!isEffectActive) return;
+      if (!window.isEffectActive) return;
       
       // Selecionar uma imagem aleatória
       const randomIndex = Math.floor(Math.random() * imageUrls.length);
@@ -238,7 +290,7 @@ function createButton() {
       }, 1500);
       
       // Agendar a próxima imagem em um intervalo aleatório
-      if (isEffectActive) {
+      if (window.isEffectActive) {
         const nextImageDelay = Math.random() * 200 + 50; // 50-250ms
         setTimeout(createSingleImage, nextImageDelay);
       }
@@ -249,11 +301,17 @@ function createButton() {
     
     // Parar o efeito após 2 segundos
     setTimeout(() => {
-      isEffectActive = false;
+      window.isEffectActive = false;
     }, 2000);
   }
 
+  // Evento de clique principal (removido o evento duplicado)
   button.addEventListener('click', async (event) => {
+    // Se o clique foi no handle de arrastar ou se foi arrasto, não ativa IA
+    if (event.target === dragHandle || isDragging || dragStarted) {
+      return;
+    }
+    
     // Iniciar o som de fundo com volume total
     backgroundSound.volume = 1.0;
     backgroundSound.currentTime = 0;
@@ -262,146 +320,111 @@ function createButton() {
     // Criar imagens flutuantes a partir do botão
     createFloatingImages();
     
-    // Adiciona o handle ao botão principal
-    button.style.position = 'fixed';
-    button.appendChild(dragHandle);
+    // Obter o elemento ativo (input ou textarea) ou qualquer elemento editável
+    const activeElement = document.activeElement;
+    let inputElement = null;
+    let isGoogleSheets = false;
     
-    // --- LÓGICA DE ARRASTAR ---
-    let isDragging = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    
-    dragHandle.addEventListener('mousedown', function(e) {
-      isDragging = true;
-      dragHandle.style.cursor = 'grabbing';
-      // Calcula o offset do mouse em relação ao botão
-      const rect = button.getBoundingClientRect();
-      dragOffsetX = e.clientX - rect.left;
-      dragOffsetY = e.clientY - rect.top;
-      // Evita seleção de texto
-      e.preventDefault();
-      e.stopPropagation();
-    });
-    
-    document.addEventListener('mousemove', function(e) {
-      if (isDragging) {
-        button.style.left = (e.clientX - dragOffsetX) + 'px';
-        button.style.top = (e.clientY - dragOffsetY) + 'px';
-        button.style.right = 'auto';
-        button.style.bottom = 'auto';
-      }
-    });
-    
-    document.addEventListener('mouseup', function() {
-      if (isDragging) {
-        isDragging = false;
-        dragHandle.style.cursor = 'grab';
-      }
-    });
-    
-    // --- DIFERENCIAÇÃO ENTRE CLIQUE E ARRASTAR ---
-    let dragStarted = false;
-    dragHandle.addEventListener('mousedown', function() {
-      dragStarted = false;
-      const moveListener = () => { dragStarted = true; };
-      document.addEventListener('mousemove', moveListener, { once: true });
-      document.addEventListener('mouseup', function mouseUpHandler() {
-        document.removeEventListener('mousemove', moveListener);
-        document.removeEventListener('mouseup', mouseUpHandler);
-      });
-    });
-    
-    button.addEventListener('click', async (event) => {
-      // Se o clique foi no handle de arrastar ou se foi arrasto, não ativa IA
-      if (event.target === dragHandle || isDragging || dragStarted) {
-        return;
-      }
-      
-      // Obter o elemento ativo (input ou textarea) ou qualquer elemento editável
-      const activeElement = document.activeElement;
-      let inputElement = null;
-      let isGoogleSheets = false;
-      
-      // Verificar se o elemento ativo é um input, textarea ou elemento editável
-      if (activeElement && 
-          (activeElement.tagName === 'INPUT' || 
-           activeElement.tagName === 'TEXTAREA' || 
-           activeElement.getAttribute('contenteditable') === 'true')) {
-        inputElement = activeElement;
-      } else {
-        // Verificar se estamos no Google Sheets
-        if (window.location.href.includes('docs.google.com/spreadsheets')) {
-          isGoogleSheets = true;
-          // Tentar encontrar o elemento de entrada de célula do Google Sheets
-          inputElement = document.querySelector('.cell-input');
-          
-          // Se não encontrou, tentar encontrar o elemento de edição ativo
-          if (!inputElement) {
-            inputElement = document.querySelector('.editable.selected');
-          }
-          
-          // Tentar outras classes comuns do Google Sheets
-          if (!inputElement) {
-            inputElement = document.querySelector('.active-cell-input') || 
-                           document.querySelector('.waffle-formula-input') ||
-                           document.querySelector('[role="textbox"]');
-          }
-        } else {
-          // Se não houver elemento ativo, tentar encontrar o campo #mention-input (compatibilidade com plugchat)
-          inputElement = document.querySelector('#mention-input');
-        }
+    // Verificar se o elemento ativo é um input, textarea ou elemento editável
+    if (activeElement && 
+        (activeElement.tagName === 'INPUT' || 
+         activeElement.tagName === 'TEXTAREA' || 
+         activeElement.getAttribute('contenteditable') === 'true')) {
+      inputElement = activeElement;
+    } else {
+      // Verificar se estamos no Google Sheets
+      if (window.location.href.includes('docs.google.com/spreadsheets')) {
+        isGoogleSheets = true;
+        // Tentar encontrar o elemento de entrada de célula do Google Sheets
+        inputElement = document.querySelector('.cell-input');
         
-        // Se ainda não encontrou, procurar qualquer input ou textarea visível
+        // Se não encontrou, tentar encontrar o elemento de edição ativo
         if (!inputElement) {
-          const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
-          if (inputs.length > 0) {
-            inputElement = inputs[0]; // Pegar o primeiro encontrado
-          }
+          inputElement = document.querySelector('.editable.selected');
+        }
+        
+        // Tentar outras classes comuns do Google Sheets
+        if (!inputElement) {
+          inputElement = document.querySelector('.active-cell-input') || 
+                         document.querySelector('.waffle-formula-input') ||
+                         document.querySelector('[role="textbox"]');
+        }
+      } else {
+        // Se não houver elemento ativo, tentar encontrar o campo #mention-input (compatibilidade com plugchat)
+        inputElement = document.querySelector('#mention-input');
+      }
+      
+      // Se ainda não encontrou, procurar qualquer input ou textarea visível
+      if (!inputElement) {
+        const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+        if (inputs.length > 0) {
+          inputElement = inputs[0]; // Pegar o primeiro encontrado
         }
       }
+    }
 
-      if (!inputElement) {
-        alert('Campo de texto não encontrado! Clique em um campo de texto antes de usar o botão.');
-        return;
-      }
+    if (!inputElement) {
+      alert('Campo de texto não encontrado! Clique em um campo de texto antes de usar o botão.');
+      // Parar efeitos em caso de erro
+      backgroundSound.pause();
+      backgroundSound.currentTime = 0;
+      window.isEffectActive = false;
+      return;
+    }
 
-      // Obter o texto do elemento, dependendo do tipo
-      let originalText = '';
-      if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
-        originalText = inputElement.value;
-      } else {
-        originalText = inputElement.innerText || inputElement.textContent;
-      }
+    // Obter o texto do elemento, dependendo do tipo
+    let originalText = '';
+    if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
+      originalText = inputElement.value;
+    } else {
+      originalText = inputElement.innerText || inputElement.textContent;
+    }
 
-      if (!originalText.trim()) {
-        alert('Digite algo antes de melhorar a frase!');
-        return;
-      }
+    if (!originalText.trim()) {
+      alert('Digite algo antes de melhorar a frase!');
+      // Parar efeitos em caso de erro
+      backgroundSound.pause();
+      backgroundSound.currentTime = 0;
+      window.isEffectActive = false;
+      return;
+    }
 
-      const improvedText = await sendToAI(originalText);
-      if (improvedText) {
-        // Mostrar a imagem de conclusão (que também controlará o fadeout do som)
-        showCompletionImage();
-        
-        // Definir o texto melhorado, dependendo do tipo de elemento
-        if (isGoogleSheets) {
-          try {
-            // Método específico para Google Sheets
-            
-            // 1. Focar no elemento
-            inputElement.focus();
-            
-            // 2. Limpar o conteúdo atual
-            document.execCommand('selectAll', false, null);
-            document.execCommand('delete', false, null);
-            
-            // 3. Inserir o novo texto
-            document.execCommand('insertText', false, improvedText);
-            
-            // 4. Simular pressionar Enter com múltiplas abordagens
-            
-            // Abordagem 1: Usar KeyboardEvent com keyCode e key
-            const enterEvent = new KeyboardEvent('keydown', {
+    const improvedText = await sendToAI(originalText);
+    if (improvedText) {
+      // Mostrar a imagem de conclusão (que também controlará o fadeout do som)
+      showCompletionImage();
+      
+      // Definir o texto melhorado, dependendo do tipo de elemento
+      if (isGoogleSheets) {
+        try {
+          // Método específico para Google Sheets
+          
+          // 1. Focar no elemento
+          inputElement.focus();
+          
+          // 2. Limpar o conteúdo atual
+          document.execCommand('selectAll', false, null);
+          document.execCommand('delete', false, null);
+          
+          // 3. Inserir o novo texto
+          document.execCommand('insertText', false, improvedText);
+          
+          // 4. Simular pressionar Enter com múltiplas abordagens
+          
+          // Abordagem 1: Usar KeyboardEvent com keyCode e key
+          const enterEvent = new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            keyCode: 13,
+            which: 13,
+            key: 'Enter',
+            code: 'Enter'
+          });
+          inputElement.dispatchEvent(enterEvent);
+          
+          // Abordagem 2: Usar KeyboardEvent com código de tecla diferente
+          setTimeout(() => {
+            const enterEvent2 = new KeyboardEvent('keypress', {
               bubbles: true,
               cancelable: true,
               keyCode: 13,
@@ -409,127 +432,120 @@ function createButton() {
               key: 'Enter',
               code: 'Enter'
             });
-            inputElement.dispatchEvent(enterEvent);
+            inputElement.dispatchEvent(enterEvent2);
+          }, 50);
+          
+          // Abordagem 3: Usar dispatchEvent com evento keyup também
+          setTimeout(() => {
+            const enterEvent3 = new KeyboardEvent('keyup', {
+              bubbles: true,
+              cancelable: true,
+              keyCode: 13,
+              which: 13,
+              key: 'Enter',
+              code: 'Enter'
+            });
+            inputElement.dispatchEvent(enterEvent3);
+          }, 100);
+          
+          // Abordagem 4: Clicar em outro lugar da página para confirmar a edição
+          setTimeout(() => {
+            // Tentar encontrar qualquer elemento clicável fora da célula
+            const otherElement = document.querySelector('body');
+            if (otherElement) {
+              otherElement.click();
+              
+              // Voltar para a célula original após um breve intervalo
+              setTimeout(() => {
+                if (inputElement) {
+                  inputElement.focus();
+                }
+              }, 100);
+            }
+          }, 150);
+          
+          // Abordagem 5: Usar o método blur() para tirar o foco do elemento
+          setTimeout(() => {
+            inputElement.blur();
+          }, 200);
+          
+        } catch (e) {
+          console.error('Erro ao aplicar texto no Google Sheets:', e);
+          
+          // Método de fallback usando clipboard e eventos de teclado
+          try {
+            // Salvar o conteúdo atual da área de transferência
+            const originalClipboard = await navigator.clipboard.readText().catch(() => '');
             
-            // Abordagem 2: Usar KeyboardEvent com código de tecla diferente
-            setTimeout(() => {
-              const enterEvent2 = new KeyboardEvent('keypress', {
-                bubbles: true,
-                cancelable: true,
-                keyCode: 13,
-                which: 13,
-                key: 'Enter',
-                code: 'Enter'
-              });
-              inputElement.dispatchEvent(enterEvent2);
-            }, 50);
+            // Copiar o texto melhorado para a área de transferência
+            await navigator.clipboard.writeText(improvedText);
             
-            // Abordagem 3: Usar dispatchEvent com evento keyup também
-            setTimeout(() => {
-              const enterEvent3 = new KeyboardEvent('keyup', {
-                bubbles: true,
-                cancelable: true,
-                keyCode: 13,
-                which: 13,
-                key: 'Enter',
-                code: 'Enter'
-              });
-              inputElement.dispatchEvent(enterEvent3);
-            }, 100);
+            // Focar no elemento
+            inputElement.focus();
             
-            // Abordagem 4: Clicar em outro lugar da página para confirmar a edição
-            setTimeout(() => {
-              // Tentar encontrar qualquer elemento clicável fora da célula
-              const otherElement = document.querySelector('body');
-              if (otherElement) {
-                otherElement.click();
-                
-                // Voltar para a célula original após um breve intervalo
-                setTimeout(() => {
-                  if (inputElement) {
-                    inputElement.focus();
-                  }
-                }, 100);
-              }
-            }, 150);
+            // Colar na célula
+            document.execCommand('paste');
             
-            // Abordagem 5: Usar o método blur() para tirar o foco do elemento
+            // Simular Enter com várias abordagens
+            const enterKeyCodes = [
+              { event: 'keydown', delay: 50 },
+              { event: 'keypress', delay: 100 },
+              { event: 'keyup', delay: 150 }
+            ];
+            
+            enterKeyCodes.forEach(({ event, delay }) => {
+              setTimeout(() => {
+                const keyEvent = new KeyboardEvent(event, {
+                  bubbles: true,
+                  cancelable: true,
+                  keyCode: 13,
+                  which: 13,
+                  key: 'Enter',
+                  code: 'Enter'
+                });
+                inputElement.dispatchEvent(keyEvent);
+              }, delay);
+            });
+            
+            // Tirar o foco do elemento após um tempo
             setTimeout(() => {
               inputElement.blur();
-            }, 200);
-            
-          } catch (e) {
-            console.error('Erro ao aplicar texto no Google Sheets:', e);
-            
-            // Método de fallback usando clipboard e eventos de teclado
-            try {
-              // Salvar o conteúdo atual da área de transferência
-              const originalClipboard = await navigator.clipboard.readText().catch(() => '');
               
-              // Copiar o texto melhorado para a área de transferência
-              await navigator.clipboard.writeText(improvedText);
-              
-              // Focar no elemento
-              inputElement.focus();
-              
-              // Colar na célula
-              document.execCommand('paste');
-              
-              // Simular Enter com várias abordagens
-              const enterKeyCodes = [
-                { event: 'keydown', delay: 50 },
-                { event: 'keypress', delay: 100 },
-                { event: 'keyup', delay: 150 }
-              ];
-              
-              enterKeyCodes.forEach(({ event, delay }) => {
-                setTimeout(() => {
-                  const keyEvent = new KeyboardEvent(event, {
-                    bubbles: true,
-                    cancelable: true,
-                    keyCode: 13,
-                    which: 13,
-                    key: 'Enter',
-                    code: 'Enter'
-                  });
-                  inputElement.dispatchEvent(keyEvent);
-                }, delay);
-              });
-              
-              // Tirar o foco do elemento após um tempo
+              // Restaurar a área de transferência original
               setTimeout(() => {
-                inputElement.blur();
-                
-                // Restaurar a área de transferência original
-                setTimeout(() => {
-                  navigator.clipboard.writeText(originalClipboard).catch(() => {});
-                }, 100);
-              }, 200);
-            } catch (clipboardError) {
-              console.error('Erro ao usar clipboard:', clipboardError);
-            }
+                navigator.clipboard.writeText(originalClipboard).catch(() => {});
+              }, 100);
+            }, 200);
+          } catch (clipboardError) {
+            console.error('Erro ao usar clipboard:', clipboardError);
           }
-        } else if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
-          inputElement.value = improvedText;
-          // Disparar eventos para inputs e textareas
-          const inputEvent = new Event('input', { bubbles: true });
-          const changeEvent = new Event('change', { bubbles: true });
-          inputElement.dispatchEvent(inputEvent);
-          inputElement.dispatchEvent(changeEvent);
-        } else {
-          inputElement.innerText = improvedText;
-          // Disparar evento de input para elementos editáveis
-          const event = new Event('input', { bubbles: true });
-          inputElement.dispatchEvent(event);
         }
+      } else if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
+        inputElement.value = improvedText;
+        // Disparar eventos para inputs e textareas
+        const inputEvent = new Event('input', { bubbles: true });
+        const changeEvent = new Event('change', { bubbles: true });
+        inputElement.dispatchEvent(inputEvent);
+        inputElement.dispatchEvent(changeEvent);
+      } else {
+        inputElement.innerText = improvedText;
+        // Disparar evento de input para elementos editáveis
+        const event = new Event('input', { bubbles: true });
+        inputElement.dispatchEvent(event);
       }
-    });
+    } else {
+      // Parar efeitos em caso de erro na requisição da IA
+      backgroundSound.pause();
+      backgroundSound.currentTime = 0;
+      window.isEffectActive = false;
+      completionImage.style.opacity = '0';
+    }
+  });
 
-    // Adicionar os elementos de áudio ao corpo do documento
-    document.body.appendChild(backgroundSound);
-    document.body.appendChild(button);
-  }
-)};
+  // Adicionar os elementos de áudio ao corpo do documento
+  document.body.appendChild(backgroundSound);
+  document.body.appendChild(button);
+}
 
 async function sendToAI(text) {
   console.log("🔄 Enviando para IA:", text); // Debug
