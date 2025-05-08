@@ -555,36 +555,35 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
   if (document.getElementById("plugin-update-box")) return;
 
   const updateBox = document.createElement("div");
-  updateBox.id = "plugin-update-box"; // ID para controle
+  updateBox.id = "plugin-update-box";
   updateBox.style = `
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #fff;
-    border: 2px solid #000;
+    background: #111;
+    color: #fff;
+    border: 2px solid #444;
     border-radius: 12px;
     padding: 16px;
     max-width: 320px;
     z-index: 999999;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
     font-family: sans-serif;
   `;
 
   updateBox.innerHTML = `
-    <strong>🔄 Nova versão disponível (${version})</strong>
-    <p style="white-space: pre-wrap;">${changelog}</p>
+    <strong style="color: #fff;">🔄 Nova versão disponível (${version})</strong>
+    <p style="white-space: pre-wrap; color: #eee;">${changelog}</p>
     <button id="baixarAtualizacao" style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
       Baixar nova versão
     </button>
-    <button id="fecharAtualizacao" style="margin-top: 6px; padding: 4px 12px; background: transparent; color: #333; border: none; cursor: pointer;">
+    <button id="fecharAtualizacao" style="margin-top: 6px; padding: 4px 12px; background: transparent; color: #ccc; border: none; cursor: pointer;">
       Fechar
     </button>
   `;
 
-  // Adiciona corretamente ao body
   document.body.appendChild(updateBox);
 
-  // Ações dos botões
   document.getElementById("baixarAtualizacao").onclick = () => {
     window.open(downloadUrl, "_blank");
     updateBox.remove();
@@ -594,7 +593,6 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     updateBox.remove();
   };
 }
-
 
 // Inicia verificação ao carregar a página
 checkForUpdate();
