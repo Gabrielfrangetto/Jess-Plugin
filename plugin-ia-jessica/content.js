@@ -63,7 +63,7 @@ function createButton() {
   
   // Criar imagem estática para o estado normal
   const catImage = document.createElement('img');
-  catImage.src = 'https://i.postimg.cc/9FxfYXsH/nyan-cat-181.png';
+  catImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/nyanimage.jpg';
   catImage.style.width = '30px';
   catImage.style.height = '30px';
   
