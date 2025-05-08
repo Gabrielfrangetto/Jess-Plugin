@@ -14,8 +14,8 @@ function createButton() {
   completionImage.style.top = '50%';
   completionImage.style.left = '50%';
   completionImage.style.transform = 'translate(-50%, -50%)';
-  completionImage.style.width = '100%'; // Aumentado em 50% (de 150px para 225px)
-  completionImage.style.height = '100%'; // Aumentado em 50% (de 150px para 225px)
+  completionImage.style.width = '120%'; // Aumentado em 50% (de 150px para 225px)
+  completionImage.style.height = '120%'; // Aumentado em 50% (de 150px para 225px)
   completionImage.style.zIndex = '10001';
   completionImage.style.opacity = '0';
   completionImage.style.transition = 'opacity 1.0s ease-in-out'; // Aumentado o tempo de transição para um fade-in mais suave
@@ -62,14 +62,14 @@ function createButton() {
   // Criar imagem estática para o estado normal
   const catImage = document.createElement('img');
   catImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/pixelated-nyan-cat-2fvhnor9105pzhkp.png';
-  catImage.style.width = '45px';
-  catImage.style.height = '29px';
+  catImage.style.width = '36px';
+  catImage.style.height = '23px';
   
   // Adicionar imagem estática como filho do botão
   button.appendChild(catImage);
   
   // Definir tamanho padrão para o botão (consistente em todas as abas)
-  const BUTTON_SIZE = 75; // Tamanho em pixels
+  const BUTTON_SIZE = 60; // Tamanho em pixels
   
   button.style.position = 'fixed';
   button.style.bottom = '15px';
