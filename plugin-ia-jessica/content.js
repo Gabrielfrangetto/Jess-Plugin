@@ -1,6 +1,4 @@
 function createButton() {
-  // Removida a verificação de URL para funcionar em qualquer site
-  
   // Criar elemento de áudio único para o efeito sonoro
   const backgroundSound = document.createElement('audio');
   backgroundSound.src = 'https://gabrielfrangetto.github.io/Pluginextras/nyancatmusic.mp3'; // Som contínuo
