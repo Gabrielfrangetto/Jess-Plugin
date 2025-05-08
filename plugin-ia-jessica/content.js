@@ -68,12 +68,15 @@ function createButton() {
   // Adicionar imagem estática como filho do botão
   button.appendChild(catImage);
   
+  // Definir tamanho padrão para o botão (consistente em todas as abas)
+  const BUTTON_SIZE = 50; // Tamanho em pixels
+  
   button.style.position = 'fixed';
   button.style.bottom = '15px';
   button.style.right = '15px';
   button.style.zIndex = 10000;
-  button.style.width = '50px';
-  button.style.height = '50px';
+  button.style.width = BUTTON_SIZE + 'px';
+  button.style.height = BUTTON_SIZE + 'px';
   button.style.borderRadius = '50%';
   button.style.backgroundColor = '#007bff';
   button.style.color = 'white';
@@ -109,8 +112,16 @@ function createButton() {
     if (savedPosition) {
       const position = JSON.parse(savedPosition);
       if (position.left && position.top) {
-        button.style.left = position.left + 'px';
-        button.style.top = position.top + 'px';
+        // Verificar se a posição salva está dentro dos limites da tela
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // Garantir que o botão esteja sempre visível na tela
+        const safeLeft = Math.min(Math.max(position.left, 0), windowWidth - BUTTON_SIZE);
+        const safeTop = Math.min(Math.max(position.top, 0), windowHeight - BUTTON_SIZE);
+        
+        button.style.left = safeLeft + 'px';
+        button.style.top = safeTop + 'px';
         button.style.right = 'auto';
         button.style.bottom = 'auto';
       }
@@ -126,8 +137,16 @@ function createButton() {
         if (e.newValue) {
           const position = JSON.parse(e.newValue);
           if (position.left && position.top) {
-            button.style.left = position.left + 'px';
-            button.style.top = position.top + 'px';
+            // Verificar se a posição está dentro dos limites da tela
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Garantir que o botão esteja sempre visível na tela
+            const safeLeft = Math.min(Math.max(position.left, 0), windowWidth - BUTTON_SIZE);
+            const safeTop = Math.min(Math.max(position.top, 0), windowHeight - BUTTON_SIZE);
+            
+            button.style.left = safeLeft + 'px';
+            button.style.top = safeTop + 'px';
             button.style.right = 'auto';
             button.style.bottom = 'auto';
           }
@@ -158,8 +177,18 @@ function createButton() {
   document.addEventListener('mousemove', function(e) {
     if (isDragging) {
       dragStarted = true;
-      const newLeft = e.clientX - dragOffsetX;
-      const newTop = e.clientY - dragOffsetY;
+      
+      // Calcular nova posição
+      let newLeft = e.clientX - dragOffsetX;
+      let newTop = e.clientY - dragOffsetY;
+      
+      // Limitar a posição dentro da janela visível
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      // Garantir que o botão esteja sempre visível na tela
+      newLeft = Math.min(Math.max(newLeft, 0), windowWidth - BUTTON_SIZE);
+      newTop = Math.min(Math.max(newTop, 0), windowHeight - BUTTON_SIZE);
       
       button.style.left = newLeft + 'px';
       button.style.top = newTop + 'px';
@@ -182,31 +211,6 @@ function createButton() {
             top: rect.top
           };
           localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
-          // Não é necessário disparar o evento storage manualmente,
-          // pois o navegador já faz isso automaticamente para outras abas
-        } catch (e) {
-          console.error('Erro ao salvar posição do botão:', e);
-        }
-      }
-    }
-  });
-  
-  // Mesmo para o evento touchend
-  document.addEventListener('touchend', function() {
-    if (isDragging) {
-      isDragging = false;
-      dragHandle.style.cursor = 'grab';
-      
-      // Salvar a posição atual no localStorage
-      if (dragStarted) {
-        try {
-          const rect = button.getBoundingClientRect();
-          const position = {
-            left: rect.left,
-            top: rect.top
-          };
-          localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
-          // O evento storage será disparado automaticamente para outras abas
         } catch (e) {
           console.error('Erro ao salvar posição do botão:', e);
         }
@@ -231,8 +235,18 @@ function createButton() {
     if (isDragging) {
       dragStarted = true;
       const touch = e.touches[0];
-      const newLeft = touch.clientX - dragOffsetX;
-      const newTop = touch.clientY - dragOffsetY;
+      
+      // Calcular nova posição
+      let newLeft = touch.clientX - dragOffsetX;
+      let newTop = touch.clientY - dragOffsetY;
+      
+      // Limitar a posição dentro da janela visível
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      // Garantir que o botão esteja sempre visível na tela
+      newLeft = Math.min(Math.max(newLeft, 0), windowWidth - BUTTON_SIZE);
+      newTop = Math.min(Math.max(newTop, 0), windowHeight - BUTTON_SIZE);
       
       button.style.left = newLeft + 'px';
       button.style.top = newTop + 'px';
