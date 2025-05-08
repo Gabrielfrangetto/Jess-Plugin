@@ -572,7 +572,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
   `;
 
   updateBox.innerHTML = `
-    <strong style="color: #fff;">🔄 Nova versão disponível (${version})</strong>
+    <strong style="color: #fff;">🔄 Nova versão disponível</strong>
     <p style="white-space: pre-wrap; color: #eee;">${changelog}</p>
     <button id="baixarAtualizacao" style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
       Baixar nova versão
