@@ -97,9 +97,11 @@ function createButton() {
   
   // Variáveis para controlar o arrasto
   let isDragging = false;
+  let wasDragging = false; // Nova variável para rastrear se houve arrasto
   let dragStartX, dragStartY;
   let initialLeft, initialTop;
   let buttonRect;
+  let dragThreshold = 5; // Limiar em pixels para considerar como arrasto
   
   // Função para iniciar o arrasto
   function startDrag(e) {
@@ -125,6 +127,7 @@ function createButton() {
     }
     
     isDragging = true;
+    wasDragging = false; // Reinicia o estado de arrasto
     
     // Adicionar classe visual para indicar que está arrastando
     button.style.opacity = '0.8';
@@ -132,9 +135,6 @@ function createButton() {
     
     // Desativar transição durante o arrasto para movimento mais suave
     button.style.transition = 'opacity 0.2s ease';
-    
-    // Salvar a posição no localStorage
-    saveButtonPosition();
   }
   
   // Função para realizar o arrasto
@@ -159,6 +159,11 @@ function createButton() {
     const deltaX = currentX - dragStartX;
     const deltaY = currentY - dragStartY;
     
+    // Verificar se o movimento excedeu o limiar para considerar como arrasto
+    if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
+      wasDragging = true;
+    }
+    
     // Calcular nova posição (convertendo de right/bottom para left/top)
     const newRight = Math.max(0, initialLeft - deltaX);
     const newBottom = Math.max(0, initialTop - deltaY);
@@ -171,9 +176,6 @@ function createButton() {
     button.style.bottom = `${Math.min(newBottom, maxBottom)}px`;
     button.style.left = 'auto'; // Garantir que left não interfira
     button.style.top = 'auto';  // Garantir que top não interfira
-    
-    // Salvar a posição no localStorage
-    saveButtonPosition();
   }
   
   // Função para finalizar o arrasto
@@ -187,8 +189,13 @@ function createButton() {
     button.style.cursor = 'pointer';
     button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease, opacity 0.2s ease';
     
-    // Salvar a posição final no localStorage
-    saveButtonPosition();
+    // Salvar a posição no localStorage apenas se realmente arrastou
+    if (wasDragging) {
+      saveButtonPosition();
+    }
+    
+    // Mantém o estado de wasDragging para o evento de clique verificar
+    // Será resetado no próximo mousedown/touchstart
   }
   
   // Função para salvar a posição do botão no localStorage
@@ -254,10 +261,11 @@ function createButton() {
   });
   
   // Modificar o evento de clique para verificar se não está arrastando
-  const originalClickHandler = button.onclick;
   button.addEventListener('click', async (event) => {
-    // Só processar o clique se não estiver arrastando
-    if (!isDragging) {
+    // Só processar o clique se não estiver arrastando ou não tiver arrastado
+    if (!isDragging && !wasDragging) {
+      console.log("Clique detectado - iniciando processamento");
+      
       // Iniciar o som de fundo com volume total
       backgroundSound.volume = 1.0;
       backgroundSound.currentTime = 0;
