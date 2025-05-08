@@ -504,3 +504,72 @@ async function sendToAI(text) {
 
 
 createButton();
+const currentVersion = chrome.runtime.getManifest().version;
+
+async function checkForUpdate() {
+  if (sessionStorage.getItem('updatePromptShown')) return;
+
+  try {
+    const res = await fetch("https://backend-plugin-ai.onrender.com/version.json");
+    const data = await res.json();
+
+    if (compareVersions(data.version, currentVersion) > 0) {
+      showUpdatePrompt(data.version, data.changelog, data.download_url);
+      sessionStorage.setItem('updatePromptShown', 'true');
+    }
+  } catch (e) {
+    console.warn("Erro ao verificar versão:", e);
+  }
+}
+
+function compareVersions(v1, v2) {
+  const a = v1.split('.').map(Number);
+  const b = v2.split('.').map(Number);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const diff = (a[i] || 0) - (b[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+function showUpdatePrompt(version, changelog, downloadUrl) {
+  const updateBox = document.createElement("div");
+  updateBox.style = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 320px;
+    z-index: 999999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-family: sans-serif;
+  `;
+
+  updateBox.innerHTML = `
+    <strong>🔄 Nova versão disponível (${version})</strong>
+    <p style="white-space: pre-wrap;">${changelog}</p>
+    <button id="baixarAtualizacao" style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
+      Baixar nova versão
+    </button>
+    <button id="fecharAtualizacao" style="margin-top: 6px; padding: 4px 12px; background: transparent; color: #333; border: none; cursor: pointer;">
+      Fechar
+    </button>
+  `;
+
+  document.body.appendChild(updateBox);
+
+  document.getElementById("baixarAtualizacao").onclick = () => {
+    window.open(downloadUrl, "_blank");
+    updateBox.remove();
+  };
+
+  document.getElementById("fecharAtualizacao").onclick = () => {
+    updateBox.remove();
+  };
+}
+
+// Inicia verificação ao carregar a página
+checkForUpdate();
