@@ -5,13 +5,13 @@ function createButton() {
   
   // Criar elemento de áudio único para o efeito sonoro
   const backgroundSound = document.createElement('audio');
-  backgroundSound.src = 'https://gabrielfrangetto.github.io/Jess-Plugin/nyancatmusic.mp3'; // Som contínuo
+  backgroundSound.src = 'https://gabrielfrangetto.github.io/Pluginextras/nyancatmusic.mp3'; // Som contínuo
   backgroundSound.preload = 'auto';
   backgroundSound.loop = true; // Fazer o som repetir continuamente
   
   // Criar elemento de imagem para mostrar após a conclusão
   const completionImage = document.createElement('img');
-  completionImage.src = 'https://gabrielfrangetto.github.io/Jess-Plugin/nyan-cat.gif'; // Imagem de conclusão
+  completionImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/nyan-cat.gif'; // Imagem de conclusão
   completionImage.style.position = 'fixed';
   completionImage.style.top = '50%';
   completionImage.style.left = '50%';
