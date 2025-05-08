@@ -182,9 +182,9 @@ function createButton() {
   function createFloatingImages() {
     // URLs das imagens
     const imageUrls = [
-      'https://i.postimg.cc/DwJB20T2/95-959337-nyan-cat-rainbow-png.png',
-      'https://i.postimg.cc/qB1tjGCF/pink-donut-cartoon-icon-png.webp',
-      'https://i.postimg.cc/0j00BKDf/Star-Emojis-Background-PNG-Image.png'
+      'https://gabrielfrangetto.github.io/Pluginextras/4-2-rainbow-nyan-cat-png-clipart.png',
+      'https://gabrielfrangetto.github.io/Pluginextras/nyancatstars.png',
+      'https://gabrielfrangetto.github.io/Pluginextras/d6c9e172c97e70e3662f401605d89c8a-donut-de-morango-com-confeitos.png'
     ];
     
     // Obter a posição do botão
