@@ -75,8 +75,12 @@ function createButton() {
   button.style.bottom = '15px';
   button.style.right = '15px';
   button.style.zIndex = 10000;
-  button.style.minWidth = BUTTON_SIZE + 'px';
-  button.style.minHeight = BUTTON_SIZE + 'px';
+  button.style.width = BUTTON_SIZE + 'px'; // Usar width em vez de minWidth
+  button.style.height = BUTTON_SIZE + 'px'; // Usar height em vez de minHeight
+  button.style.minWidth = 'unset'; // Remover minWidth para evitar conflitos
+  button.style.minHeight = 'unset'; // Remover minHeight para evitar conflitos
+  button.style.maxWidth = BUTTON_SIZE + 'px'; // Adicionar maxWidth para garantir tamanho fixo
+  button.style.maxHeight = BUTTON_SIZE + 'px'; // Adicionar maxHeight para garantir tamanho fixo
   button.style.borderRadius = '50%';
   button.style.backgroundColor = '#007bff';
   button.style.color = 'white';
@@ -86,6 +90,13 @@ function createButton() {
   button.style.justifyContent = 'center';
   button.style.alignItems = 'center';
   button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease';
+  button.style.padding = '0'; // Remover padding para evitar que afete o tamanho
+  button.style.margin = '0'; // Remover margin para evitar que afete o tamanho
+  button.style.boxSizing = 'border-box'; // Garantir que padding e border não aumentem o tamanho
+  button.style.overflow = 'hidden'; // Evitar que o conteúdo ultrapasse o tamanho definido
+  
+  // Adicionar !important para sobrescrever estilos de sites externos
+  button.setAttribute('style', button.getAttribute('style') + ' width: ' + BUTTON_SIZE + 'px !important; height: ' + BUTTON_SIZE + 'px !important;');
   
   // --- HANDLE DE ARRASTAR ---
   const dragHandle = document.createElement('div');
