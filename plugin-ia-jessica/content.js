@@ -94,161 +94,32 @@ function createButton() {
   // Adicionar GIF como filho do botão
   button.appendChild(catGif);
   
-  // Variáveis para controlar o arrasto
-  let isDragging = false;
-  let dragStartX = 0;
-  let dragStartY = 0;
-  let initialX = 0;
-  let initialY = 0;
-  let dragTimeout = null;
-  
-  // Função para salvar a posição do botão no localStorage
-  function saveButtonPosition() {
-    const rect = button.getBoundingClientRect();
-    const position = {
-      right: window.innerWidth - rect.right,
-      bottom: window.innerHeight - rect.bottom
-    };
-    localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
-  }
-  
-  // Função para carregar a posição do botão do localStorage
-  function loadButtonPosition() {
-    const savedPosition = localStorage.getItem('nyanCatButtonPosition');
-    if (savedPosition) {
-      try {
-        const position = JSON.parse(savedPosition);
-        button.style.right = position.right + 'px';
-        button.style.bottom = position.bottom + 'px';
-      } catch (e) {
-        console.error('Erro ao carregar posição do botão:', e);
-      }
-    }
-  }
-  
-  // Carregar posição salva ao criar o botão
-  loadButtonPosition();
-  
-  // Adicionar eventos para arrastar o botão
-  button.addEventListener('mousedown', (e) => {
-    // Iniciar temporizador para determinar se é um clique ou arrasto
-    dragTimeout = setTimeout(() => {
-      isDragging = true;
-      
-      // Adicionar indicador visual de que o botão está sendo arrastado
-      button.style.cursor = 'grabbing';
-      button.style.opacity = '0.8';
-      
-      // Adicionar uma borda para indicar que está em modo de arrasto
-      button.style.border = '2px dashed #ff00ff';
-      
-      // Mostrar mensagem de ajuda
-      const helpMsg = document.createElement('div');
-      helpMsg.id = 'drag-help-message';
-      helpMsg.textContent = 'Arraste para posicionar';
-      helpMsg.style.position = 'fixed';
-      helpMsg.style.top = (e.clientY - 30) + 'px';
-      helpMsg.style.left = (e.clientX + 20) + 'px';
-      helpMsg.style.background = 'rgba(0,0,0,0.7)';
-      helpMsg.style.color = 'white';
-      helpMsg.style.padding = '5px 10px';
-      helpMsg.style.borderRadius = '5px';
-      helpMsg.style.fontSize = '12px';
-      helpMsg.style.zIndex = '10001';
-      document.body.appendChild(helpMsg);
-    }, 200); // 200ms para determinar se é um arrasto
-    
-    // Registrar posição inicial do mouse e do botão
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    
-    // Obter posição atual do botão
-    const rect = button.getBoundingClientRect();
-    initialX = window.innerWidth - rect.right;
-    initialY = window.innerHeight - rect.bottom;
-    
-    // Prevenir comportamento padrão
-    e.preventDefault();
-  });
-  
-  // Adicionar evento de movimento do mouse para arrastar
-  document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-      // Calcular nova posição
-      const deltaX = e.clientX - dragStartX;
-      const deltaY = e.clientY - dragStartY;
-      
-      // Atualizar posição do botão (invertendo os deltas para right/bottom)
-      button.style.right = (initialX - deltaX) + 'px';
-      button.style.bottom = (initialY - deltaY) + 'px';
-      
-      // Atualizar posição da mensagem de ajuda
-      const helpMsg = document.getElementById('drag-help-message');
-      if (helpMsg) {
-        helpMsg.style.top = (e.clientY - 30) + 'px';
-        helpMsg.style.left = (e.clientX + 20) + 'px';
-      }
-      
-      // Prevenir comportamento padrão
-      e.preventDefault();
-    }
-  });
-  
-  // Adicionar evento para finalizar o arrasto
-  document.addEventListener('mouseup', () => {
-    // Limpar o timeout para evitar que o modo de arrasto seja ativado após soltar
-    if (dragTimeout) {
-      clearTimeout(dragTimeout);
-      dragTimeout = null;
-    }
-    
-    if (isDragging) {
-      // Restaurar aparência do botão
-      button.style.cursor = 'pointer';
-      button.style.opacity = '1';
-      button.style.border = 'none';
-      
-      // Salvar a nova posição
-      saveButtonPosition();
-      
-      // Remover mensagem de ajuda
-      const helpMsg = document.getElementById('drag-help-message');
-      if (helpMsg) {
-        document.body.removeChild(helpMsg);
-      }
-      
-      // Resetar flag de arrasto
-      isDragging = false;
-    }
-  });
-  
   // Adicionando eventos para o efeito de ampliação e troca de ícone
   button.addEventListener('mouseenter', () => {
-    if (!isDragging) { // Só aplicar efeitos se não estiver arrastando
-      button.style.transform = 'scale(1.2)';
-      button.style.boxShadow = '0 0 15px rgba(255, 183, 197, 0.7)';
-      catImage.style.display = 'none'; // Esconder a imagem estática
-      catGif.style.display = 'block'; // Mostrar o GIF
-      
-      // Iniciar o efeito RGB
-      startRGBEffect();
-    }
+    button.style.transform = 'scale(1.2)';
+    button.style.boxShadow = '0 0 15px rgba(255, 183, 197, 0.7)';
+    catImage.style.display = 'none'; // Esconder a imagem estática
+    catGif.style.display = 'block'; // Mostrar o GIF
+    
+    // Iniciar o efeito RGB
+    startRGBEffect();
   });
   
   button.addEventListener('mouseleave', () => {
-    if (!isDragging) { // Só aplicar efeitos se não estiver arrastando
-      button.style.transform = 'scale(1)';
-      button.style.boxShadow = 'none';
-      catImage.style.display = 'block'; // Mostrar a imagem estática
-      catGif.style.display = 'none'; // Esconder o GIF
-      
-      // Restaurar a cor de fundo original (caso tenha sido clicado)
-      button.style.backgroundColor = '#007bff';
-      
-      // Parar o efeito RGB
-      stopRGBEffect();
-    }
+    button.style.transform = 'scale(1)';
+    button.style.boxShadow = 'none';
+    catImage.style.display = 'block'; // Mostrar a imagem estática
+    catGif.style.display = 'none'; // Esconder o GIF
+    
+    // Restaurar a cor de fundo original (caso tenha sido clicado)
+    button.style.backgroundColor = '#007bff';
+    
+    // Parar o efeito RGB
+    stopRGBEffect();
   });
+  
+  // Variável para armazenar o ID do intervalo do efeito RGB
+  let rgbIntervalId = null;
   
   // Função para iniciar o efeito RGB
   function startRGBEffect() {
@@ -304,33 +175,26 @@ function createButton() {
     }
   });
   
-  // Adicionando efeito de Imagens Flutuantes ao Clicar no Botão
-  
+  // Função para criar uma imagem flutuante
   function createFloatingImages() {
-    // URLs das imagens
     const imageUrls = [
       'https://gabrielfrangetto.github.io/Pluginextras/4-2-rainbow-nyan-cat-png-clipart.png',
       'https://gabrielfrangetto.github.io/Pluginextras/star8bit.png',
       'https://gabrielfrangetto.github.io/Pluginextras/donut8bit.png'
     ];
     
-    // Obter a posição do botão
     const buttonRect = button.getBoundingClientRect();
     const buttonTop = buttonRect.top;
     const buttonLeft = buttonRect.left;
     
-    // Variável para controlar se o efeito está ativo
     let isEffectActive = true;
     
-    // Função para criar uma única imagem flutuante
     function createSingleImage() {
       if (!isEffectActive) return;
       
-      // Selecionar uma imagem aleatória
       const randomIndex = Math.floor(Math.random() * imageUrls.length);
       const imgUrl = imageUrls[randomIndex];
       
-      // Criar elemento de imagem
       const floatingImg = document.createElement('img');
       floatingImg.src = imgUrl;
       floatingImg.style.position = 'fixed';
@@ -340,267 +204,63 @@ function createButton() {
       floatingImg.style.opacity = '1';
       floatingImg.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
       
-      // Posicionar à esquerda do botão com um pouco de aleatoriedade
-      floatingImg.style.left = (buttonLeft - 30 - Math.random() * 50) + 'px'; // 30-80px à esquerda
-      floatingImg.style.top = (buttonTop - 20 + Math.random() * 40) + 'px'; // Variação vertical
+      floatingImg.style.left = (buttonLeft - 30 - Math.random() * 50) + 'px';
+      floatingImg.style.top = (buttonTop - 20 + Math.random() * 40) + 'px';
       
-      // Adicionar ao corpo do documento
       document.body.appendChild(floatingImg);
       
-      // Aplicar animação após um pequeno delay
       setTimeout(() => {
-        // Movimento para cima e para a esquerda
-        const moveX = -50 - (Math.random() * 70); // Mais para a esquerda
-        const moveY = -70 - (Math.random() * 50); // Para cima
-        const rotate = (Math.random() * 360) - 180; // Rotação aleatória
-        const scale = 0.8 + Math.random() * 0.5; // Variação de tamanho
+        const moveX = -50 - (Math.random() * 70);
+        const moveY = -70 - (Math.random() * 50);
+        const rotate = (Math.random() * 360) - 180;
+        const scale = 0.8 + Math.random() * 0.5;
         
         floatingImg.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${rotate}deg) scale(${scale})`;
         floatingImg.style.opacity = '0';
       }, 10);
       
-      // Remover o elemento após a animação
       setTimeout(() => {
         if (document.body.contains(floatingImg)) {
           document.body.removeChild(floatingImg);
         }
       }, 1500);
       
-      // Agendar a próxima imagem em um intervalo aleatório
       if (isEffectActive) {
-        const nextImageDelay = Math.random() * 200 + 50; // 50-250ms
+        const nextImageDelay = Math.random() * 200 + 50;
         setTimeout(createSingleImage, nextImageDelay);
       }
     }
     
-    // Iniciar o efeito
     createSingleImage();
     
-    // Parar o efeito após 2 segundos
     setTimeout(() => {
       isEffectActive = false;
     }, 2000);
   }
 
+  const dragHandle = document.createElement('div');
+  dragHandle.style.width = '20px';
+  dragHandle.style.height = '20px';
+  dragHandle.style.position = 'absolute';
+  dragHandle.style.top = '0';
+  dragHandle.style.right = '0';
+  dragHandle.style.cursor = 'grab';
+  dragHandle.style.backgroundColor = '#fff';
+  dragHandle.style.borderRadius = '50%';
+  button.appendChild(dragHandle);
+  
   button.addEventListener('click', async (event) => {
-    // Iniciar o som de fundo com volume total
+    if (event.target === dragHandle) return; // Evitar conflito com o arrasto
+    
     backgroundSound.volume = 1.0;
     backgroundSound.currentTime = 0;
     backgroundSound.play().catch(err => console.error('Erro ao tocar som de fundo:', err));
     
-    // Criar imagens flutuantes a partir do botão
     createFloatingImages();
-    
-    // Obter o elemento ativo (input ou textarea) ou qualquer elemento editável
-    const activeElement = document.activeElement;
-    let inputElement = null;
-    let isGoogleSheets = false;
-    
-    // Verificar se o elemento ativo é um input, textarea ou elemento editável
-    if (activeElement && 
-        (activeElement.tagName === 'INPUT' || 
-         activeElement.tagName === 'TEXTAREA' || 
-         activeElement.getAttribute('contenteditable') === 'true')) {
-      inputElement = activeElement;
-    } else {
-      // Verificar se estamos no Google Sheets
-      if (window.location.href.includes('docs.google.com/spreadsheets')) {
-        isGoogleSheets = true;
-        // Tentar encontrar o elemento de entrada de célula do Google Sheets
-        inputElement = document.querySelector('.cell-input');
-        
-        // Se não encontrou, tentar encontrar o elemento de edição ativo
-        if (!inputElement) {
-          inputElement = document.querySelector('.editable.selected');
-        }
-        
-        // Tentar outras classes comuns do Google Sheets
-        if (!inputElement) {
-          inputElement = document.querySelector('.active-cell-input') || 
-                         document.querySelector('.waffle-formula-input') ||
-                         document.querySelector('[role="textbox"]');
-        }
-      } else {
-        // Se não houver elemento ativo, tentar encontrar o campo #mention-input (compatibilidade com plugchat)
-        inputElement = document.querySelector('#mention-input');
-      }
-      
-      // Se ainda não encontrou, procurar qualquer input ou textarea visível
-      if (!inputElement) {
-        const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
-        if (inputs.length > 0) {
-          inputElement = inputs[0]; // Pegar o primeiro encontrado
-        }
-      }
-    }
-
-    if (!inputElement) {
-      alert('Campo de texto não encontrado! Clique em um campo de texto antes de usar o botão.');
-      return;
-    }
-
-    // Obter o texto do elemento, dependendo do tipo
-    let originalText = '';
-    if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
-      originalText = inputElement.value;
-    } else {
-      originalText = inputElement.innerText || inputElement.textContent;
-    }
-
-    if (!originalText.trim()) {
-      alert('Digite algo antes de melhorar a frase!');
-      return;
-    }
-
-    const improvedText = await sendToAI(originalText);
-    if (improvedText) {
-      // Mostrar a imagem de conclusão (que também controlará o fadeout do som)
-      showCompletionImage();
-      
-      // Definir o texto melhorado, dependendo do tipo de elemento
-      if (isGoogleSheets) {
-        try {
-          // Método específico para Google Sheets
-          
-          // 1. Focar no elemento
-          inputElement.focus();
-          
-          // 2. Limpar o conteúdo atual
-          document.execCommand('selectAll', false, null);
-          document.execCommand('delete', false, null);
-          
-          // 3. Inserir o novo texto
-          document.execCommand('insertText', false, improvedText);
-          
-          // 4. Simular pressionar Enter com múltiplas abordagens
-          
-          // Abordagem 1: Usar KeyboardEvent com keyCode e key
-          const enterEvent = new KeyboardEvent('keydown', {
-            bubbles: true,
-            cancelable: true,
-            keyCode: 13,
-            which: 13,
-            key: 'Enter',
-            code: 'Enter'
-          });
-          inputElement.dispatchEvent(enterEvent);
-          
-          // Abordagem 2: Usar KeyboardEvent com código de tecla diferente
-          setTimeout(() => {
-            const enterEvent2 = new KeyboardEvent('keypress', {
-              bubbles: true,
-              cancelable: true,
-              keyCode: 13,
-              which: 13,
-              key: 'Enter',
-              code: 'Enter'
-            });
-            inputElement.dispatchEvent(enterEvent2);
-          }, 50);
-          
-          // Abordagem 3: Usar dispatchEvent com evento keyup também
-          setTimeout(() => {
-            const enterEvent3 = new KeyboardEvent('keyup', {
-              bubbles: true,
-              cancelable: true,
-              keyCode: 13,
-              which: 13,
-              key: 'Enter',
-              code: 'Enter'
-            });
-            inputElement.dispatchEvent(enterEvent3);
-          }, 100);
-          
-          // Abordagem 4: Clicar em outro lugar da página para confirmar a edição
-          setTimeout(() => {
-            // Tentar encontrar qualquer elemento clicável fora da célula
-            const otherElement = document.querySelector('body');
-            if (otherElement) {
-              otherElement.click();
-              
-              // Voltar para a célula original após um breve intervalo
-              setTimeout(() => {
-                if (inputElement) {
-                  inputElement.focus();
-                }
-              }, 100);
-            }
-          }, 150);
-          
-          // Abordagem 5: Usar o método blur() para tirar o foco do elemento
-          setTimeout(() => {
-            inputElement.blur();
-          }, 200);
-          
-        } catch (e) {
-          console.error('Erro ao aplicar texto no Google Sheets:', e);
-          
-          // Método de fallback usando clipboard e eventos de teclado
-          try {
-            // Salvar o conteúdo atual da área de transferência
-            const originalClipboard = await navigator.clipboard.readText().catch(() => '');
-            
-            // Copiar o texto melhorado para a área de transferência
-            await navigator.clipboard.writeText(improvedText);
-            
-            // Focar no elemento
-            inputElement.focus();
-            
-            // Colar na célula
-            document.execCommand('paste');
-            
-            // Simular Enter com várias abordagens
-            const enterKeyCodes = [
-              { event: 'keydown', delay: 50 },
-              { event: 'keypress', delay: 100 },
-              { event: 'keyup', delay: 150 }
-            ];
-            
-            enterKeyCodes.forEach(({ event, delay }) => {
-              setTimeout(() => {
-                const keyEvent = new KeyboardEvent(event, {
-                  bubbles: true,
-                  cancelable: true,
-                  keyCode: 13,
-                  which: 13,
-                  key: 'Enter',
-                  code: 'Enter'
-                });
-                inputElement.dispatchEvent(keyEvent);
-              }, delay);
-            });
-            
-            // Tirar o foco do elemento após um tempo
-            setTimeout(() => {
-              inputElement.blur();
-              
-              // Restaurar a área de transferência original
-              setTimeout(() => {
-                navigator.clipboard.writeText(originalClipboard).catch(() => {});
-              }, 100);
-            }, 200);
-          } catch (clipboardError) {
-            console.error('Erro ao usar clipboard:', clipboardError);
-          }
-        }
-      } else if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
-        inputElement.value = improvedText;
-        // Disparar eventos para inputs e textareas
-        const inputEvent = new Event('input', { bubbles: true });
-        const changeEvent = new Event('change', { bubbles: true });
-        inputElement.dispatchEvent(inputEvent);
-        inputElement.dispatchEvent(changeEvent);
-      } else {
-        inputElement.innerText = improvedText;
-        // Disparar evento de input para elementos editáveis
-        const event = new Event('input', { bubbles: true });
-        inputElement.dispatchEvent(event);
-      }
-    }
+    button.style.position = 'fixed';
+    document.body.appendChild(button);
   });
 
-  // Adicionar os elementos de áudio ao corpo do documento
-  document.body.appendChild(backgroundSound);
   document.body.appendChild(button);
 }
 
@@ -677,7 +337,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #000000;
+    background: #fff;
     border: 2px solid #000;
     border-radius: 12px;
     padding: 16px;
@@ -688,7 +348,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
   `;
 
   updateBox.innerHTML = `
-    <strong>🔄 Nova versão disponível</strong>
+    <strong>🔄 Nova versão disponível (${version})</strong>
     <p style="white-space: pre-wrap;">${changelog}</p>
     <button id="baixarAtualizacao" style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
       Baixar nova versão
