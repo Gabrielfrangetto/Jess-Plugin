@@ -101,18 +101,34 @@ function createButton() {
   // --- HANDLE DE ARRASTAR ---
   const dragHandle = document.createElement('div');
   dragHandle.style.position = 'absolute';
-  dragHandle.style.top = '-12px';
+  dragHandle.style.top = '-15px'; // Aumentado para ficar mais para cima
   dragHandle.style.left = '50%';
   dragHandle.style.transform = 'translateX(-50%)';
-  dragHandle.style.width = '22px';
-  dragHandle.style.height = '22px';
+  dragHandle.style.width = '25px'; // Aumentado o tamanho
+  dragHandle.style.height = '25px'; // Aumentado o tamanho
   dragHandle.style.background = '#444';
   dragHandle.style.borderRadius = '50%';
   dragHandle.style.border = '2px solid #fff';
   dragHandle.style.cursor = 'grab';
-  dragHandle.style.zIndex = '10001';
+  dragHandle.style.zIndex = '10002'; // Aumentado o z-index para ficar acima do botão
+  dragHandle.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; // Adicionado sombra para destacar
   dragHandle.title = 'Arraste para mover';
   dragHandle.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#888"/><path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+  
+  // Garantir que o handle não seja afetado por estilos externos
+  dragHandle.setAttribute('style', dragHandle.getAttribute('style') + 
+    ' position: absolute !important;' +
+    ' top: -15px !important;' +
+    ' left: 50% !important;' +
+    ' transform: translateX(-50%) !important;' +
+    ' width: 25px !important;' +
+    ' height: 25px !important;' +
+    ' background: #444 !important;' +
+    ' border-radius: 50% !important;' +
+    ' border: 2px solid #fff !important;' +
+    ' cursor: grab !important;' +
+    ' z-index: 10002 !important;' +
+    ' box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;');
   
   // Adiciona o handle ao botão principal
   button.appendChild(dragHandle);
