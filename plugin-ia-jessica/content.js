@@ -99,90 +99,56 @@ function createButton() {
   button.setAttribute('style', button.getAttribute('style') + ' width: ' + BUTTON_SIZE + 'px !important; height: ' + BUTTON_SIZE + 'px !important;');
   
   // --- HANDLE DE ARRASTAR ---
+  // Criar o handle como um elemento separado fora do botão
   const dragHandle = document.createElement('div');
+  
+  // Definir tamanho menor para o handle
+  const HANDLE_SIZE = 20; // Tamanho reduzido
+  
+  // Configurar estilos do handle
   dragHandle.style.position = 'absolute';
-  dragHandle.style.top = '-15px'; // Aumentado para ficar mais para cima
+  dragHandle.style.top = '-15px';
   dragHandle.style.left = '50%';
   dragHandle.style.transform = 'translateX(-50%)';
-  dragHandle.style.width = '25px'; // Aumentado o tamanho
-  dragHandle.style.height = '25px'; // Aumentado o tamanho
+  dragHandle.style.width = HANDLE_SIZE + 'px';
+  dragHandle.style.height = HANDLE_SIZE + 'px';
   dragHandle.style.background = '#444';
   dragHandle.style.borderRadius = '50%';
   dragHandle.style.border = '2px solid #fff';
   dragHandle.style.cursor = 'grab';
-  dragHandle.style.zIndex = '10002'; // Aumentado o z-index para ficar acima do botão
-  dragHandle.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)'; // Adicionado sombra para destacar
+  dragHandle.style.zIndex = '10002';
+  dragHandle.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
   dragHandle.title = 'Arraste para mover';
-  dragHandle.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#888"/><path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+  dragHandle.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#888"/><path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
   
   // Garantir que o handle não seja afetado por estilos externos
-  dragHandle.setAttribute('style', dragHandle.getAttribute('style') + 
-    ' position: absolute !important;' +
-    ' top: -15px !important;' +
-    ' left: 50% !important;' +
-    ' transform: translateX(-50%) !important;' +
-    ' width: 25px !important;' +
-    ' height: 25px !important;' +
-    ' background: #444 !important;' +
-    ' border-radius: 50% !important;' +
-    ' border: 2px solid #fff !important;' +
-    ' cursor: grab !important;' +
-    ' z-index: 10002 !important;' +
-    ' box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;');
+  dragHandle.setAttribute('style', 
+    'position: absolute !important;' +
+    'top: -15px !important;' +
+    'left: 50% !important;' +
+    'transform: translateX(-50%) !important;' +
+    'width: ' + HANDLE_SIZE + 'px !important;' +
+    'height: ' + HANDLE_SIZE + 'px !important;' +
+    'background: #444 !important;' +
+    'border-radius: 50% !important;' +
+    'border: 2px solid #fff !important;' +
+    'cursor: grab !important;' +
+    'z-index: 10002 !important;' +
+    'box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) !important;' +
+    'pointer-events: auto !important;'); // Garantir que eventos de mouse funcionem
   
-  // Adiciona o handle ao botão principal
-  button.appendChild(dragHandle);
+  // Adicionar o handle ao documento, não ao botão
+  document.body.appendChild(dragHandle);
   
-  // --- CARREGAR POSIÇÃO SALVA DO LOCALSTORAGE ---
-  try {
-    const savedPosition = localStorage.getItem('nyanCatButtonPosition');
-    if (savedPosition) {
-      const position = JSON.parse(savedPosition);
-      if (position.left && position.top) {
-        // Verificar se a posição salva está dentro dos limites da tela
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-        
-        // Garantir que o botão esteja sempre visível na tela
-        const safeLeft = Math.min(Math.max(position.left, 0), windowWidth - BUTTON_SIZE);
-        const safeTop = Math.min(Math.max(position.top, 0), windowHeight - BUTTON_SIZE);
-        
-        button.style.left = safeLeft + 'px';
-        button.style.top = safeTop + 'px';
-        button.style.right = 'auto';
-        button.style.bottom = 'auto';
-      }
-    }
-  } catch (e) {
-    console.error('Erro ao carregar posição do botão:', e);
+  // Função para atualizar a posição do handle quando o botão se move
+  function updateHandlePosition() {
+    const rect = button.getBoundingClientRect();
+    dragHandle.style.left = (rect.left + rect.width / 2) + 'px';
+    dragHandle.style.top = (rect.top - 10) + 'px';
   }
   
-  // --- ADICIONAR LISTENER PARA MUDANÇAS NO LOCALSTORAGE EM OUTRAS ABAS ---
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'nyanCatButtonPosition') {
-      try {
-        if (e.newValue) {
-          const position = JSON.parse(e.newValue);
-          if (position.left && position.top) {
-            // Verificar se a posição está dentro dos limites da tela
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-            
-            // Garantir que o botão esteja sempre visível na tela
-            const safeLeft = Math.min(Math.max(position.left, 0), windowWidth - BUTTON_SIZE);
-            const safeTop = Math.min(Math.max(position.top, 0), windowHeight - BUTTON_SIZE);
-            
-            button.style.left = safeLeft + 'px';
-            button.style.top = safeTop + 'px';
-            button.style.right = 'auto';
-            button.style.bottom = 'auto';
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao atualizar posição do botão de outra aba:', error);
-      }
-    }
-  });
+  // Atualizar posição inicial do handle
+  setTimeout(updateHandlePosition, 100);
   
   // --- LÓGICA DE ARRASTAR ---
   let isDragging = false;
@@ -221,6 +187,9 @@ function createButton() {
       button.style.top = newTop + 'px';
       button.style.right = 'auto';
       button.style.bottom = 'auto';
+      
+      // Atualizar a posição do handle junto com o botão
+      updateHandlePosition();
     }
   });
   
@@ -367,8 +336,33 @@ function createButton() {
   // Função para parar o efeito RGB
   function stopRGBEffect() {
     if (rgbIntervalId) {
+      // Não limpar o intervalo imediatamente, fazer fade-out
+      const fadeOutDuration = 500; // 500ms para o fade-out
+      const fadeOutSteps = 10; // Número de passos para o fade-out
+      const fadeOutInterval = fadeOutDuration / fadeOutSteps;
+      
+      // Salvar a cor atual
+      const currentColor = window.getComputedStyle(button).backgroundColor;
+      const currentShadow = window.getComputedStyle(button).boxShadow;
+      
+      // Parar o efeito RGB
       clearInterval(rgbIntervalId);
       rgbIntervalId = null;
+      
+      // Iniciar o fade-out
+      let step = 0;
+      const fadeOutId = setInterval(() => {
+        step++;
+        const opacity = 1 - (step / fadeOutSteps);
+        
+        // Aplicar fade-out na cor
+        button.style.backgroundColor = '#007bff';
+        button.style.boxShadow = 'none';
+        
+        if (step >= fadeOutSteps) {
+          clearInterval(fadeOutId);
+        }
+      }, fadeOutInterval);
     }
   }
   
