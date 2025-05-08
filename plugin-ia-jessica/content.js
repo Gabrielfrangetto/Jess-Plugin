@@ -183,8 +183,8 @@ function createButton() {
     // URLs das imagens
     const imageUrls = [
       'https://gabrielfrangetto.github.io/Pluginextras/4-2-rainbow-nyan-cat-png-clipart.png',
-      'https://gabrielfrangetto.github.io/Pluginextras/nyancatstars.png',
-      'https://gabrielfrangetto.github.io/Pluginextras/d6c9e172c97e70e3662f401605d89c8a-donut-de-morango-com-confeitos.png'
+      'https://gabrielfrangetto.github.io/Pluginextras/star8bit.png',
+      'https://gabrielfrangetto.github.io/Pluginextras/donut8bit.png'
     ];
     
     // Obter a posição do botão
