@@ -97,11 +97,11 @@ function createButton() {
   
   // Variáveis para controlar o arrasto
   let isDragging = false;
-  let wasDragging = false; // Nova variável para rastrear se houve arrasto
   let dragStartX, dragStartY;
   let initialLeft, initialTop;
   let buttonRect;
   let dragThreshold = 5; // Limiar em pixels para considerar como arrasto
+  let dragDistance = 0; // Distância percorrida durante o arrasto
   
   // Função para iniciar o arrasto
   function startDrag(e) {
@@ -126,12 +126,11 @@ function createButton() {
       dragStartY = e.clientY;
     }
     
-    isDragging = true;
-    wasDragging = false; // Reinicia o estado de arrasto
+    // Inicializar a distância de arrasto
+    dragDistance = 0;
     
-    // Adicionar classe visual para indicar que está arrastando
-    button.style.opacity = '0.8';
-    button.style.cursor = 'grabbing';
+    // Definir como potencial arrasto (será confirmado em doDrag)
+    isDragging = false;
     
     // Desativar transição durante o arrasto para movimento mais suave
     button.style.transition = 'opacity 0.2s ease';
@@ -139,7 +138,16 @@ function createButton() {
   
   // Função para realizar o arrasto
   function doDrag(e) {
-    if (!isDragging) return;
+    // Se o botão do mouse não estiver pressionado, não fazer nada
+    if (e.type === 'mousemove' && e.buttons === 0) {
+      endDrag();
+      return;
+    }
+    
+    // Se não temos as coordenadas iniciais, não fazer nada
+    if (typeof dragStartX === 'undefined' || typeof dragStartY === 'undefined') {
+      return;
+    }
     
     // Prevenir comportamento padrão
     e.preventDefault();
@@ -155,47 +163,52 @@ function createButton() {
       currentY = e.clientY;
     }
     
-    // Calcular o deslocamento
+    // Calcular a distância percorrida
     const deltaX = currentX - dragStartX;
     const deltaY = currentY - dragStartY;
+    dragDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
-    // Verificar se o movimento excedeu o limiar para considerar como arrasto
-    if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
-      wasDragging = true;
+    // Se a distância for maior que o limiar, considerar como arrasto
+    if (dragDistance > dragThreshold) {
+      isDragging = true;
+      
+      // Adicionar classe visual para indicar que está arrastando
+      button.style.opacity = '0.8';
+      button.style.cursor = 'grabbing';
+      
+      // Calcular nova posição (convertendo de right/bottom para left/top)
+      const newRight = Math.max(0, initialLeft - deltaX);
+      const newBottom = Math.max(0, initialTop - deltaY);
+      
+      // Limitar a posição para não sair da tela
+      const maxRight = window.innerWidth - buttonRect.width;
+      const maxBottom = window.innerHeight - buttonRect.height;
+      
+      button.style.right = `${Math.min(newRight, maxRight)}px`;
+      button.style.bottom = `${Math.min(newBottom, maxBottom)}px`;
+      button.style.left = 'auto'; // Garantir que left não interfira
+      button.style.top = 'auto';  // Garantir que top não interfira
     }
-    
-    // Calcular nova posição (convertendo de right/bottom para left/top)
-    const newRight = Math.max(0, initialLeft - deltaX);
-    const newBottom = Math.max(0, initialTop - deltaY);
-    
-    // Limitar a posição para não sair da tela
-    const maxRight = window.innerWidth - buttonRect.width;
-    const maxBottom = window.innerHeight - buttonRect.height;
-    
-    button.style.right = `${Math.min(newRight, maxRight)}px`;
-    button.style.bottom = `${Math.min(newBottom, maxBottom)}px`;
-    button.style.left = 'auto'; // Garantir que left não interfira
-    button.style.top = 'auto';  // Garantir que top não interfira
   }
   
   // Função para finalizar o arrasto
   function endDrag() {
-    if (!isDragging) return;
-    
-    isDragging = false;
-    
-    // Restaurar aparência
-    button.style.opacity = '1';
-    button.style.cursor = 'pointer';
-    button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease, opacity 0.2s ease';
-    
-    // Salvar a posição no localStorage apenas se realmente arrastou
-    if (wasDragging) {
+    // Se foi considerado um arrasto, salvar a posição
+    if (isDragging) {
+      // Restaurar aparência
+      button.style.opacity = '1';
+      button.style.cursor = 'pointer';
+      button.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.2s ease, opacity 0.2s ease';
+      
+      // Salvar a posição final no localStorage
       saveButtonPosition();
     }
     
-    // Mantém o estado de wasDragging para o evento de clique verificar
-    // Será resetado no próximo mousedown/touchstart
+    // Resetar as variáveis de controle
+    isDragging = false;
+    dragStartX = undefined;
+    dragStartY = undefined;
+    dragDistance = 0;
   }
   
   // Função para salvar a posição do botão no localStorage
@@ -262,10 +275,8 @@ function createButton() {
   
   // Modificar o evento de clique para verificar se não está arrastando
   button.addEventListener('click', async (event) => {
-    // Só processar o clique se não estiver arrastando ou não tiver arrastado
-    if (!isDragging && !wasDragging) {
-      console.log("Clique detectado - iniciando processamento");
-      
+    // Só processar o clique se não foi considerado um arrasto
+    if (!isDragging && dragDistance < dragThreshold) {
       // Iniciar o som de fundo com volume total
       backgroundSound.volume = 1.0;
       backgroundSound.currentTime = 0;
@@ -555,35 +566,36 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
   if (document.getElementById("plugin-update-box")) return;
 
   const updateBox = document.createElement("div");
-  updateBox.id = "plugin-update-box";
+  updateBox.id = "plugin-update-box"; // ID para controle
   updateBox.style = `
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #111;
-    color: #fff;
-    border: 2px solid #444;
+    background: #fff;
+    border: 2px solid #000;
     border-radius: 12px;
     padding: 16px;
     max-width: 320px;
     z-index: 999999;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     font-family: sans-serif;
   `;
 
   updateBox.innerHTML = `
-    <strong style="color: #fff;">🔄 Nova versão disponível</strong>
-    <p style="white-space: pre-wrap; color: #eee;">${changelog}</p>
+    <strong>🔄 Nova versão disponível (${version})</strong>
+    <p style="white-space: pre-wrap;">${changelog}</p>
     <button id="baixarAtualizacao" style="margin-top: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
       Baixar nova versão
     </button>
-    <button id="fecharAtualizacao" style="margin-top: 6px; padding: 4px 12px; background: transparent; color: #ccc; border: none; cursor: pointer;">
+    <button id="fecharAtualizacao" style="margin-top: 6px; padding: 4px 12px; background: transparent; color: #333; border: none; cursor: pointer;">
       Fechar
     </button>
   `;
 
+  // Adiciona corretamente ao body
   document.body.appendChild(updateBox);
 
+  // Ações dos botões
   document.getElementById("baixarAtualizacao").onclick = () => {
     window.open(downloadUrl, "_blank");
     updateBox.remove();
@@ -593,6 +605,7 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
     updateBox.remove();
   };
 }
+
 
 // Inicia verificação ao carregar a página
 checkForUpdate();
