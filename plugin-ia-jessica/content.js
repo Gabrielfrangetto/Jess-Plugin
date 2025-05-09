@@ -528,13 +528,19 @@ function createButton() {
     
     // Apenas mostrar o Nyan Cat completo se a chance for favorável (10%)
     if (shouldShowNyanCat) {
+      console.log("Sorte! Mostrando Nyan Cat completo (10% de chance)");
+      
       // Iniciar o som de fundo com volume total
       backgroundSound.volume = 1.0;
       backgroundSound.currentTime = 0;
-      backgroundSound.play().catch(err => console.error('Erro ao tocar som de fundo:', err));
       
-      // Mostrar a imagem de conclusão
-      showCompletionImage();
+      // Tocar o som e mostrar a imagem apenas se o som começar a tocar com sucesso
+      backgroundSound.play()
+        .then(() => {
+          // Som começou a tocar com sucesso, agora mostrar a imagem
+          showCompletionImage();
+        })
+        .catch(err => console.error('Erro ao tocar som de fundo:', err));
     }
     
     // Obter o elemento ativo (input ou textarea) ou qualquer elemento editável
@@ -819,7 +825,7 @@ function showUsageInfo(usage) {
   usageInfo.style.position = 'fixed';
   usageInfo.style.bottom = '75px';
   usageInfo.style.right = '15px';
-  usageInfo.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+  usageInfo.style.backgroundColor = 'red';
   usageInfo.style.padding = '8px';
   usageInfo.style.borderRadius = '5px';
   usageInfo.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
