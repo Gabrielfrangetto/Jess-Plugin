@@ -188,23 +188,20 @@ function createButton() {
     
     // Carregar posição salva do localStorage (se existir)
     try {
-  const savedPosition = localStorage.getItem('nyanCatButtonPosition');
-  if (savedPosition) {
-    const position = JSON.parse(savedPosition);
-    if (position) {
-      button.style.left = position.left + 'px';
-      button.style.top = position.top + 'px';
-      button.style.right = 'auto';
-      button.style.bottom = 'auto';
+      const savedPosition = localStorage.getItem('nyanCatButtonPosition');
+      if (savedPosition) {
+        const position = JSON.parse(savedPosition);
+        button.style.left = position.left + 'px';
+        button.style.top = position.top + 'px';
+        button.style.right = 'auto';
+        button.style.bottom = 'auto';
         
-      // Atualizar a posição do handle também
-      setTimeout(updateHandlePosition, 100);
+        // Atualizar a posição do handle também
+        setTimeout(updateHandlePosition, 100);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar posição do botão:', e);
     }
-  }
-} catch (e) {
-  console.error('Erro ao carregar posição do botão:', e);
-}
-
     
     // Adicionar listener para o evento 'storage' para sincronizar entre abas
     window.addEventListener('storage', function(e) {
@@ -231,6 +228,10 @@ function createButton() {
     let dragStarted = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
+    
+    // Variável para controlar a frequência de atualizações
+    let lastUpdateTime = 0;
+    const UPDATE_INTERVAL = 50; // Atualizar a cada 50ms durante o arrasto
     
     dragHandle.addEventListener('mousedown', function(e) {
       isDragging = true;
@@ -266,6 +267,31 @@ function createButton() {
         
         // Atualizar a posição do handle junto com o botão
         updateHandlePosition();
+        
+        // Sincronizar em tempo real com outras abas (com limitação de frequência)
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTime > UPDATE_INTERVAL) {
+          lastUpdateTime = currentTime;
+          
+          try {
+            const position = {
+              left: newLeft,
+              top: newTop,
+              timestamp: currentTime // Adicionar timestamp para identificar atualizações mais recentes
+            };
+            
+            // Usar um nome de chave diferente para atualizações em tempo real
+            localStorage.setItem('nyanCatButtonPosition_realtime', JSON.stringify(position));
+            
+            // Remover imediatamente para garantir que o evento storage seja disparado novamente
+            // na próxima atualização, mesmo que a posição seja a mesma
+            setTimeout(() => {
+              localStorage.removeItem('nyanCatButtonPosition_realtime');
+            }, 5);
+          } catch (e) {
+            console.error('Erro ao sincronizar posição em tempo real:', e);
+          }
+        }
       }
     });
     
@@ -274,21 +300,16 @@ function createButton() {
         isDragging = false;
         dragHandle.style.cursor = 'grab';
         
-        // Salvar a posição atual no localStorage
+        // Salvar a posição final no localStorage
         if (dragStarted) {
           try {
             const rect = button.getBoundingClientRect();
             const position = {
               left: rect.left,
-              top: rect.top
+              top: rect.top,
+              timestamp: Date.now()
             };
             localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
-              // Disparar o evento de storage manualmente para sincronizar entre abas
-            const event = new StorageEvent('storage', {
-                key: 'nyanCatButtonPosition',
-                newValue: JSON.stringify(position)
-            });
-            window.dispatchEvent(event);
           } catch (e) {
             console.error('Erro ao salvar posição do botão:', e);
           }
@@ -330,6 +351,31 @@ function createButton() {
         button.style.top = newTop + 'px';
         button.style.right = 'auto';
         button.style.bottom = 'auto';
+        
+        // Atualizar a posição do handle junto com o botão
+        updateHandlePosition();
+        
+        // Sincronizar em tempo real com outras abas (com limitação de frequência)
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTime > UPDATE_INTERVAL) {
+          lastUpdateTime = currentTime;
+          
+          try {
+            const position = {
+              left: newLeft,
+              top: newTop,
+              timestamp: currentTime
+            };
+            
+            localStorage.setItem('nyanCatButtonPosition_realtime', JSON.stringify(position));
+            
+            setTimeout(() => {
+              localStorage.removeItem('nyanCatButtonPosition_realtime');
+            }, 5);
+          } catch (e) {
+            console.error('Erro ao sincronizar posição em tempo real (touch):', e);
+          }
+        }
       }
     });
     
@@ -338,18 +384,18 @@ function createButton() {
         isDragging = false;
         dragHandle.style.cursor = 'grab';
         
-        // Salvar a posição atual no localStorage
+        // Salvar a posição final no localStorage
         if (dragStarted) {
           try {
             const rect = button.getBoundingClientRect();
             const position = {
               left: rect.left,
-              top: rect.top
+              top: rect.top,
+              timestamp: Date.now()
             };
             localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
-            // O evento storage será disparado automaticamente para outras abas
           } catch (e) {
-            console.error('Erro ao salvar posição do botão:', e);
+            console.error('Erro ao salvar posição do botão (touch):', e);
           }
         }
       }
