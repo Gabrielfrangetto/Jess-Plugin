@@ -23,38 +23,68 @@ function createButton() {
   document.body.appendChild(completionImage);
   
   // Função para mostrar a imagem de conclusão e controlar o som
-  function showCompletionImage() {
-    // Garantir que a imagem comece invisível
+function showCompletionImage() {
+  // Garantir que a imagem comece invisível
+  completionImage.style.opacity = '0';
+
+  // Forçar um reflow para garantir que a transição funcione
+  void completionImage.offsetWidth;
+
+  // Mostrar a imagem com transparência (efeito fade-in)
+  completionImage.style.opacity = '1.0';
+
+  // Esconder a imagem após 2 segundos e fazer fadeout do som
+  setTimeout(() => {
+    // Iniciar o fadeout da imagem
     completionImage.style.opacity = '0';
-    
-    // Forçar um reflow para garantir que a transição funcione
-    void completionImage.offsetWidth;
-    
-    // Mostrar a imagem com transparência (efeito fade-in)
-    completionImage.style.opacity = '1.0';
-    
-    // Esconder a imagem após 2 segundos e fazer fadeout do som
-    setTimeout(() => {
-      // Iniciar o fadeout da imagem
-      completionImage.style.opacity = '0';
-      
-      // Iniciar o fadeout do som
-      let volume = backgroundSound.volume;
-      const fadeInterval = setInterval(() => {
-        // Reduzir o volume gradualmente
-        volume -= 0.1;
-        if (volume <= 0) {
-          // Quando o volume chegar a zero, parar o som e limpar o intervalo
-          backgroundSound.pause();
-          backgroundSound.currentTime = 0;
-          clearInterval(fadeInterval);
-        } else {
-          // Atualizar o volume
-          backgroundSound.volume = volume;
-        }
-      }, 100); // Ajustar a cada 100ms para um fadeout de aproximadamente 1 segundo
-      
-    }, 2000);
+
+    // Iniciar o fadeout do som
+    let volume = backgroundSound.volume;
+    const fadeInterval = setInterval(() => {
+      // Reduzir o volume gradualmente
+      volume -= 0.1;
+      if (volume <= 0) {
+        // Quando o volume chegar a zero, parar o som e limpar o intervalo
+        backgroundSound.pause();
+        backgroundSound.currentTime = 0;
+        clearInterval(fadeInterval);
+      } else {
+        // Atualizar o volume
+        backgroundSound.volume = volume;
+      }
+    }, 100); // Ajustar a cada 100ms para um fadeout de aproximadamente 1 segundo
+  }, 2000); // Tempo antes de começar a fade-out
+}
+  button.addEventListener('click', async (event) => {
+  // Se o clique foi no handle de arrastar ou se foi arrasto, não ativa IA
+  if (event.target === dragHandle || isDragging || dragStarted) {
+    return;
+  }
+
+  // Gerar um número aleatório entre 0 e 1
+  const randomChance = Math.random();
+
+  // Verificar se o número é menor que 0.1 (10% de chance)
+  const shouldShowNyanCat = randomChance < 0.1;
+
+  // Criar imagens flutuantes a partir do botão (sempre acontece)
+  createFloatingImages();
+
+  // Apenas mostrar o Nyan Cat completo se a chance for favorável (10%)
+  if (shouldShowNyanCat) {
+    console.log("Sorte! Mostrando Nyan Cat completo (10% de chance)");
+
+    // Iniciar o som de fundo com volume total
+    backgroundSound.volume = 1.0;
+    backgroundSound.currentTime = 0;
+
+    // Tocar o som e só exibir a imagem se o som começar a tocar
+    backgroundSound.play()
+      .then(() => {
+        // O som começou a tocar, agora podemos mostrar a imagem
+        showCompletionImage();
+      })
+      .catch(err => console.error('Erro ao tocar som de fundo:', err));
   }
   
   const button = document.createElement('button');
