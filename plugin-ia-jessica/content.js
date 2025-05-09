@@ -197,12 +197,14 @@ function createButton() {
       button.style.right = 'auto';
       button.style.bottom = 'auto';
         
-        // Atualizar a posição do handle também
-        setTimeout(updateHandlePosition, 100);
-      }
-    } catch (e) {
-      console.error('Erro ao carregar posição do botão:', e);
+      // Atualizar a posição do handle também
+      setTimeout(updateHandlePosition, 100);
     }
+  }
+} catch (e) {
+  console.error('Erro ao carregar posição do botão:', e);
+}
+
     
     // Adicionar listener para o evento 'storage' para sincronizar entre abas
     window.addEventListener('storage', function(e) {
