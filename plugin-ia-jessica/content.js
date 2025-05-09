@@ -205,13 +205,14 @@ function createButton() {
     
     // Adicionar listener para o evento 'storage' para sincronizar entre abas
     window.addEventListener('storage', function(e) {
+      console.log('Evento storage detectado:', e.key, e.newValue);
+      
       // Verificar se é uma atualização de posição (final ou em tempo real)
       if (e.key === 'nyanCatButtonPosition' || e.key === 'nyanCatButtonPosition_realtime') {
         try {
-          const position = JSON.parse(e.newValue);
-          
-          // Ignorar valores nulos (quando o item é removido)
-          if (position) {
+          if (e.newValue) {
+            const position = JSON.parse(e.newValue);
+            
             // Atualizar a posição do botão
             button.style.left = position.left + 'px';
             button.style.top = position.top + 'px';
@@ -220,6 +221,8 @@ function createButton() {
             
             // Atualizar a posição do handle também
             updateHandlePosition();
+            
+            console.log('Posição atualizada via evento storage:', position);
           }
         } catch (e) {
           console.error('Erro ao processar evento de storage:', e);
@@ -281,16 +284,17 @@ function createButton() {
             const position = {
               left: newLeft,
               top: newTop,
-              timestamp: currentTime // Adicionar timestamp para identificar atualizações mais recentes
+              timestamp: currentTime
             };
             
             // Usar um nome de chave diferente para atualizações em tempo real
-            localStorage.setItem('nyanCatButtonPosition_realtime', JSON.stringify(position));
+            // Primeiro remover para garantir que o evento seja disparado mesmo se o valor for o mesmo
+            localStorage.removeItem('nyanCatButtonPosition_realtime');
             
-            // Remover imediatamente para garantir que o evento storage seja disparado novamente
-            // na próxima atualização, mesmo que a posição seja a mesma
+            // Forçar um pequeno atraso antes de definir o novo valor
             setTimeout(() => {
-              localStorage.removeItem('nyanCatButtonPosition_realtime');
+              localStorage.setItem('nyanCatButtonPosition_realtime', JSON.stringify(position));
+              console.log('Posição sincronizada em tempo real:', position);
             }, 5);
           } catch (e) {
             console.error('Erro ao sincronizar posição em tempo real:', e);
@@ -371,10 +375,13 @@ function createButton() {
               timestamp: currentTime
             };
             
-            localStorage.setItem('nyanCatButtonPosition_realtime', JSON.stringify(position));
+            // Primeiro remover para garantir que o evento seja disparado
+            localStorage.removeItem('nyanCatButtonPosition_realtime');
             
+            // Forçar um pequeno atraso antes de definir o novo valor
             setTimeout(() => {
-              localStorage.removeItem('nyanCatButtonPosition_realtime');
+              localStorage.setItem('nyanCatButtonPosition_realtime', JSON.stringify(position));
+              console.log('Posição sincronizada em tempo real (touch):', position);
             }, 5);
           } catch (e) {
             console.error('Erro ao sincronizar posição em tempo real (touch):', e);
