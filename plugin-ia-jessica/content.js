@@ -178,11 +178,11 @@ function createButton() {
     // Atualizar posição inicial do handle
     setTimeout(updateHandlePosition, 100);
     
-    // Adicionar evento de scroll para atualizar a posição do handle
-    window.addEventListener('scroll', updateHandlePosition, { passive: true });
+    // Adicionar listener para o evento de scroll para manter o handle alinhado com o botão
+    window.addEventListener('scroll', updateHandlePosition);
     
-    // Adicionar evento de resize para atualizar a posição do handle
-    window.addEventListener('resize', updateHandlePosition, { passive: true });
+    // Adicionar listener para o evento de redimensionamento da janela
+    window.addEventListener('resize', updateHandlePosition);
     
     // Carregar posição salva do localStorage (se existir)
     try {
