@@ -205,10 +205,14 @@ function createButton() {
     
     // Adicionar listener para o evento 'storage' para sincronizar entre abas
     window.addEventListener('storage', function(e) {
-      if (e.key === 'nyanCatButtonPosition') {
+      // Verificar se é uma atualização de posição (final ou em tempo real)
+      if (e.key === 'nyanCatButtonPosition' || e.key === 'nyanCatButtonPosition_realtime') {
         try {
           const position = JSON.parse(e.newValue);
+          
+          // Ignorar valores nulos (quando o item é removido)
           if (position) {
+            // Atualizar a posição do botão
             button.style.left = position.left + 'px';
             button.style.top = position.top + 'px';
             button.style.right = 'auto';
