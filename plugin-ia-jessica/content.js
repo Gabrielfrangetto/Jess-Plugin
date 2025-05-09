@@ -517,13 +517,22 @@ function createButton() {
       return;
     }
     
-    // Iniciar o som de fundo com volume total
-    backgroundSound.volume = 1.0;
-    backgroundSound.currentTime = 0;
-    backgroundSound.play().catch(err => console.error('Erro ao tocar som de fundo:', err));
+    // Adicionar chance de 10% para ativar o efeito Nyan Cat
+    const randomChance = Math.random();
+    const activateNyanCat = randomChance <= 0.1; // 10% de chance
     
-    // Criar imagens flutuantes a partir do botão
-    createFloatingImages();
+    if (activateNyanCat) {
+      // Iniciar o som de fundo com volume total
+      backgroundSound.volume = 1.0;
+      backgroundSound.currentTime = 0;
+      backgroundSound.play().catch(err => console.error('Erro ao tocar som de fundo:', err));
+      
+      // Criar imagens flutuantes a partir do botão
+      createFloatingImages();
+      
+      // Mostrar a imagem de conclusão
+      showCompletionImage();
+    }
     
     // Obter o elemento ativo (input ou textarea) ou qualquer elemento editável
     const activeElement = document.activeElement;
@@ -561,7 +570,7 @@ function createButton() {
       
       // Se ainda não encontrou, procurar qualquer input ou textarea visível
       if (!inputElement) {
-        const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+        const inputs = document.querySelectorAll('input["text"], textarea, [contenteditable="true"]');
         if (inputs.length > 0) {
           inputElement = inputs[0]; // Pegar o primeiro encontrado
         }
@@ -807,7 +816,7 @@ function showUsageInfo(usage) {
   usageInfo.style.position = 'fixed';
   usageInfo.style.bottom = '75px';
   usageInfo.style.right = '15px';
-  usageInfo.style.backgroundColor = 'red';
+  usageInfo.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
   usageInfo.style.padding = '8px';
   usageInfo.style.borderRadius = '5px';
   usageInfo.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
