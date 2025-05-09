@@ -188,13 +188,14 @@ function createButton() {
     
     // Carregar posição salva do localStorage (se existir)
     try {
-      const savedPosition = localStorage.getItem('nyanCatButtonPosition');
-      if (savedPosition) {
-        const position = JSON.parse(savedPosition);
-        button.style.left = position.left + 'px';
-        button.style.top = position.top + 'px';
-        button.style.right = 'auto';
-        button.style.bottom = 'auto';
+  const savedPosition = localStorage.getItem('nyanCatButtonPosition');
+  if (savedPosition) {
+    const position = JSON.parse(savedPosition);
+    if (position) {
+      button.style.left = position.left + 'px';
+      button.style.top = position.top + 'px';
+      button.style.right = 'auto';
+      button.style.bottom = 'auto';
         
         // Atualizar a posição do handle também
         setTimeout(updateHandlePosition, 100);
@@ -280,6 +281,12 @@ function createButton() {
               top: rect.top
             };
             localStorage.setItem('nyanCatButtonPosition', JSON.stringify(position));
+              // Disparar o evento de storage manualmente para sincronizar entre abas
+            const event = new StorageEvent('storage', {
+                key: 'nyanCatButtonPosition',
+                newValue: JSON.stringify(position)
+            });
+            window.dispatchEvent(event);
           } catch (e) {
             console.error('Erro ao salvar posição do botão:', e);
           }
