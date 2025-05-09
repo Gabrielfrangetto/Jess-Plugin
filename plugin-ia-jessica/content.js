@@ -807,7 +807,7 @@ function showUsageInfo(usage) {
   usageInfo.style.position = 'fixed';
   usageInfo.style.bottom = '75px';
   usageInfo.style.right = '15px';
-  usageInfo.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+  usageInfo.style.backgroundColor = 'red';
   usageInfo.style.padding = '8px';
   usageInfo.style.borderRadius = '5px';
   usageInfo.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
