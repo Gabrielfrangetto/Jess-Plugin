@@ -778,12 +778,60 @@ async function sendToAI(text) {
 
     const data = await response.json();
     console.log("✅ Resposta da IA:", data);
+    
+    // Exibir informações de uso se disponíveis
+    if (data.usage) {
+      showUsageInfo(data.usage);
+    }
+    
     return data.result.trim();
   } catch (error) {
     console.error('⚠️ Erro na comunicação com o servidor:', error);
     alert('Ocorreu um erro ao processar sua solicitação.');
     return null;
   }
+}
+
+// Função para exibir informações de uso
+function showUsageInfo(usage) {
+  // Remover qualquer info de uso anterior
+  const existingInfo = document.getElementById('jessica-usage-info');
+  if (existingInfo) {
+    existingInfo.remove();
+  }
+  
+  // Criar elemento para mostrar informações de uso
+  const usageInfo = document.createElement('div');
+  usageInfo.id = 'jessica-usage-info';
+  usageInfo.className = 'usage-info';
+  usageInfo.style.position = 'fixed';
+  usageInfo.style.bottom = '75px';
+  usageInfo.style.right = '15px';
+  usageInfo.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+  usageInfo.style.padding = '8px';
+  usageInfo.style.borderRadius = '5px';
+  usageInfo.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+  usageInfo.style.zIndex = '9999';
+  
+  usageInfo.innerHTML = `
+    <div>Requisições: ${usage.requestsToday}/${usage.requestLimit}</div>
+    <div>Tokens: ${usage.tokensToday}/${usage.tokenLimit}</div>
+  `;
+  
+  document.body.appendChild(usageInfo);
+  
+  // Remover após 5 segundos
+  setTimeout(() => {
+    if (document.body.contains(usageInfo)) {
+      usageInfo.style.opacity = '0';
+      usageInfo.style.transition = 'opacity 0.5s ease';
+      setTimeout(() => {
+        if (document.body.contains(usageInfo)) {
+          document.body.removeChild(usageInfo);
+        }
+      }, 500);
+    }
+  }, 5000);
 }
 
 createButton();
@@ -863,3 +911,28 @@ function showUpdatePrompt(version, changelog, downloadUrl) {
 
 // Inicia verificação ao carregar a página
 checkForUpdate();
+
+
+// Verificar uso atual ao iniciar
+async function checkCurrentUsage() {
+  try {
+    const response = await fetch('https://backend-plugin-ai.onrender.com/usage/jessica');
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log("📊 Informações de uso:", data);
+      
+      // Armazenar localmente para referência
+      localStorage.setItem('jessicaUsageData', JSON.stringify(data));
+    }
+  } catch (error) {
+    console.error('⚠️ Erro ao verificar uso:', error);
+  }
+}
+
+// Chamar ao iniciar
+document.addEventListener('DOMContentLoaded', () => {
+  checkCurrentUsage();
+  // Verificar uso a cada hora
+  setInterval(checkCurrentUsage, 3600000);
+});
