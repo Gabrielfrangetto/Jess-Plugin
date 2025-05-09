@@ -20,13 +20,21 @@ function createButton() {
   completionImage.style.opacity = '0';
   completionImage.style.transition = 'opacity 1.0s ease-in-out'; // Aumentado o tempo de transição para um fade-in mais suave
   completionImage.style.pointerEvents = 'none'; // Evita que a imagem interfira com cliques
-  completionImage.style.display = 'none'; // Inicialmente oculto
   document.body.appendChild(completionImage);
   
   // Função para mostrar a imagem de conclusão e controlar o som
   function showCompletionImage() {
-    // Primeiro, garantir que a imagem esteja visível no DOM
-    completionImage.style.display = 'block';
+    // Verificar se a imagem deve aparecer (10% de chance)
+    const shouldShowImage = Math.random() <= 0.1; // 10% de chance
+    
+    if (!shouldShowImage) {
+      return; // Não mostrar a imagem nem tocar o som
+    }
+    
+    // Tocar o som de fundo apenas se a imagem for mostrada
+    backgroundSound.volume = 1.0;
+    backgroundSound.currentTime = 0;
+    backgroundSound.play().catch(err => console.error('Erro ao tocar som de fundo:', err));
     
     // Garantir que a imagem comece invisível
     completionImage.style.opacity = '0';
@@ -57,11 +65,6 @@ function createButton() {
           backgroundSound.volume = volume;
         }
       }, 100); // Ajustar a cada 100ms para um fadeout de aproximadamente 1 segundo
-      
-      // Ocultar completamente a imagem após o fade-out
-      setTimeout(() => {
-        completionImage.style.display = 'none';
-      }, 1000);
       
     }, 2000);
   }
@@ -519,42 +522,21 @@ function createButton() {
     }, 2000);
   }
 
-  // Evento de clique principal
+  // Evento de clique principal (removido o evento duplicado)
   button.addEventListener('click', async (event) => {
     // Se o clique foi no handle de arrastar ou se foi arrasto, não ativa IA
     if (event.target === dragHandle || isDragging || dragStarted) {
       return;
     }
     
-    // Gerar um número aleatório entre 0 e 1
-    const randomChance = Math.random();
+    // Remover a inicialização do som daqui, pois agora só tocará se a imagem aparecer
+    // (será iniciado dentro da função showCompletionImage)
     
-    // Verificar se o número é menor que 0.1 (10% de chance)
-    const shouldShowNyanCat = randomChance < 0.1;
-    
-    // Criar imagens flutuantes a partir do botão (sempre acontece)
+    // Criar imagens flutuantes a partir do botão
     createFloatingImages();
     
-    // Apenas mostrar o Nyan Cat completo se a chance for favorável (10%)
-    if (shouldShowNyanCat) {
-      console.log("Sorte! Mostrando Nyan Cat completo (10% de chance)");
-      
-      // Iniciar o som de fundo com volume total
-      backgroundSound.volume = 1.0;
-      backgroundSound.currentTime = 0;
-      
-      // Tocar o som e só exibir a imagem se o som começar a tocar
-      backgroundSound.play()
-        .then(() => {
-          // O som começou a tocar, agora podemos mostrar a imagem
-          showCompletionImage();
-        })
-        .catch(err => console.error('Erro ao tocar som de fundo:', err));
-    } else {
-      // Garantir que a imagem esteja oculta quando não for mostrar o Nyan Cat
-      completionImage.style.opacity = '0';
-      completionImage.style.display = 'none';
-    }
+    // Mostrar a imagem de conclusão (com 10% de chance)
+    showCompletionImage();
     
     // Obter o elemento ativo (input ou textarea) ou qualquer elemento editável
     const activeElement = document.activeElement;
@@ -592,7 +574,7 @@ function createButton() {
       
       // Se ainda não encontrou, procurar qualquer input ou textarea visível
       if (!inputElement) {
-        const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+        const inputs = document.querySelectorAll('input["text"], textarea, [contenteditable="true"]');
         if (inputs.length > 0) {
           inputElement = inputs[0]; // Pegar o primeiro encontrado
         }
