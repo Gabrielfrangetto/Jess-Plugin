@@ -517,18 +517,21 @@ function createButton() {
       return;
     }
     
-    // Adicionar chance de 10% para ativar o efeito Nyan Cat
+    // Gerar um número aleatório entre 0 e 1
     const randomChance = Math.random();
-    const activateNyanCat = randomChance <= 0.1; // 10% de chance
     
-    if (activateNyanCat) {
+    // Verificar se o número é menor que 0.1 (10% de chance)
+    const shouldShowNyanCat = randomChance < 0.1;
+    
+    // Criar imagens flutuantes a partir do botão (sempre acontece)
+    createFloatingImages();
+    
+    // Apenas mostrar o Nyan Cat completo se a chance for favorável (10%)
+    if (shouldShowNyanCat) {
       // Iniciar o som de fundo com volume total
       backgroundSound.volume = 1.0;
       backgroundSound.currentTime = 0;
       backgroundSound.play().catch(err => console.error('Erro ao tocar som de fundo:', err));
-      
-      // Criar imagens flutuantes a partir do botão
-      createFloatingImages();
       
       // Mostrar a imagem de conclusão
       showCompletionImage();
@@ -545,104 +548,217 @@ function createButton() {
          activeElement.tagName === 'TEXTAREA' || 
          activeElement.getAttribute('contenteditable') === 'true')) {
       inputElement = activeElement;
-    }
-    
-    // Também verificar outros inputs no documento
-    if (!inputElement) {
-      const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
-      if (inputs.length > 0) {
-        inputElement = inputs[0]; // Usar o primeiro elemento encontrado
-      }
-    }
-    
-    // Se não tiver um elemento de entrada, verificar se é o Google Sheets
-    if (!inputElement && window.location.href.includes('docs.google.com/spreadsheets')) {
-      isGoogleSheets = true;
-      // Tentar obter a célula ativa no Google Sheets
-      inputElement = document.querySelector('.cell-input');
-    }
-    
-    // Se não encontrou nenhum elemento de entrada, mostrar alerta
-    if (!inputElement && !isGoogleSheets) {
-      alert('Por favor, clique em um campo de texto antes de usar o botão.');
-      return;
-    }
-    
-    // Obter o texto selecionado ou todo o texto do elemento
-    let selectedText = '';
-    
-    if (isGoogleSheets) {
-      // Lógica específica para Google Sheets
-      selectedText = document.querySelector('.cell-input')?.textContent || '';
     } else {
-      // Para elementos normais de entrada
-      selectedText = window.getSelection().toString() || inputElement.value || inputElement.textContent || '';
-    }
-    
-    // Se não houver texto, mostrar alerta
-    if (!selectedText.trim()) {
-      alert('Por favor, selecione ou digite algum texto antes de usar o botão.');
-      return;
-    }
-    
-    // Mostrar indicador de carregamento
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.style.position = 'fixed';
-    loadingIndicator.style.top = '50%';
-    loadingIndicator.style.left = '50%';
-    loadingIndicator.style.transform = 'translate(-50%, -50%)';
-    loadingIndicator.style.background = 'rgba(0, 0, 0, 0.7)';
-    loadingIndicator.style.color = 'white';
-    loadingIndicator.style.padding = '20px';
-    loadingIndicator.style.borderRadius = '10px';
-    loadingIndicator.style.zIndex = '10000';
-    loadingIndicator.textContent = 'Processando...';
-    document.body.appendChild(loadingIndicator);
-    
-    try {
-      // Enviar para a IA e obter resposta
-      const result = await sendToAI(selectedText);
+      // Verificar se estamos no Google Sheets
+      if (window.location.href.includes('docs.google.com/spreadsheets')) {
+        isGoogleSheets = true;
+        // Tentar encontrar o elemento de entrada de célula do Google Sheets
+        inputElement = document.querySelector('.cell-input');
+        
+        // Se não encontrou, tentar encontrar o elemento de edição ativo
+        if (!inputElement) {
+          inputElement = document.querySelector('.editable.selected');
+        }
+        
+        // Tentar outras classes comuns do Google Sheets
+        if (!inputElement) {
+          inputElement = document.querySelector('.active-cell-input') || 
+                         document.querySelector('.waffle-formula-input') ||
+                         document.querySelector('[role="textbox"]');
+        }
+      } else {
+        // Se não houver elemento ativo, tentar encontrar o campo #mention-input (compatibilidade com plugchat)
+        inputElement = document.querySelector('#mention-input');
+      }
       
-      // Remover indicador de carregamento
-      document.body.removeChild(loadingIndicator);
-      
-      if (result) {
-        // Substituir o texto selecionado pela resposta da IA
-        if (isGoogleSheets) {
-          // Lógica específica para Google Sheets
-          // Simular pressionar Ctrl+V com o novo texto
-          const activeCell = document.querySelector('.cell-input');
-          if (activeCell) {
-            // Usar execCommand para colar o texto
-            document.execCommand('insertText', false, result);
-          }
-        } else if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
-          // Para elementos input e textarea
-          const start = inputElement.selectionStart;
-          const end = inputElement.selectionEnd;
-          inputElement.value = 
-            inputElement.value.substring(0, start) + 
-            result + 
-            inputElement.value.substring(end);
-          
-          // Atualizar a posição do cursor
-          inputElement.selectionStart = start + result.length;
-          inputElement.selectionEnd = start + result.length;
-        } else if (inputElement.getAttribute('contenteditable') === 'true') {
-          // Para elementos com contenteditable
-          document.execCommand('insertText', false, result);
+      // Se ainda não encontrou, procurar qualquer input ou textarea visível
+      if (!inputElement) {
+        const inputs = document.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+        if (inputs.length > 0) {
+          inputElement = inputs[0]; // Pegar o primeiro encontrado
         }
       }
-    } catch (error) {
-      console.error('Erro ao processar texto:', error);
-      // Remover indicador de carregamento em caso de erro
-      if (document.body.contains(loadingIndicator)) {
-        document.body.removeChild(loadingIndicator);
+    }
+
+    if (!inputElement) {
+      alert('Campo de texto não encontrado! Clique em um campo de texto antes de usar o botão.');
+      // Parar efeitos em caso de erro
+      backgroundSound.pause();
+      backgroundSound.currentTime = 0;
+      window.isEffectActive = false;
+      return;
+    }
+
+    // Obter o texto do elemento, dependendo do tipo
+    let originalText = '';
+    if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
+      originalText = inputElement.value;
+    } else {
+      originalText = inputElement.innerText || inputElement.textContent;
+    }
+
+    if (!originalText.trim()) {
+      alert('Digite algo antes de melhorar a frase!');
+      // Parar efeitos em caso de erro
+      backgroundSound.pause();
+      backgroundSound.currentTime = 0;
+      window.isEffectActive = false;
+      return;
+    }
+
+    const improvedText = await sendToAI(originalText);
+    if (improvedText) {
+      // Mostrar a imagem de conclusão (que também controlará o fadeout do som)
+      showCompletionImage();
+      
+      // Definir o texto melhorado, dependendo do tipo de elemento
+      if (isGoogleSheets) {
+        try {
+          // Método específico para Google Sheets
+          
+          // 1. Focar no elemento
+          inputElement.focus();
+          
+          // 2. Limpar o conteúdo atual
+          document.execCommand('selectAll', false, null);
+          document.execCommand('delete', false, null);
+          
+          // 3. Inserir o novo texto
+          document.execCommand('insertText', false, improvedText);
+          
+          // 4. Simular pressionar Enter com múltiplas abordagens
+          
+          // Abordagem 1: Usar KeyboardEvent com keyCode e key
+          const enterEvent = new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            keyCode: 13,
+            which: 13,
+            key: 'Enter',
+            code: 'Enter'
+          });
+          inputElement.dispatchEvent(enterEvent);
+          
+          // Abordagem 2: Usar KeyboardEvent com código de tecla diferente
+          setTimeout(() => {
+            const enterEvent2 = new KeyboardEvent('keypress', {
+              bubbles: true,
+              cancelable: true,
+              keyCode: 13,
+              which: 13,
+              key: 'Enter',
+              code: 'Enter'
+            });
+            inputElement.dispatchEvent(enterEvent2);
+          }, 50);
+          
+          // Abordagem 3: Usar dispatchEvent com evento keyup também
+          setTimeout(() => {
+            const enterEvent3 = new KeyboardEvent('keyup', {
+              bubbles: true,
+              cancelable: true,
+              keyCode: 13,
+              which: 13,
+              key: 'Enter',
+              code: 'Enter'
+            });
+            inputElement.dispatchEvent(enterEvent3);
+          }, 100);
+          
+          // Abordagem 4: Clicar em outro lugar da página para confirmar a edição
+          setTimeout(() => {
+            // Tentar encontrar qualquer elemento clicável fora da célula
+            const otherElement = document.querySelector('body');
+            if (otherElement) {
+              otherElement.click();
+              
+              // Voltar para a célula original após um breve intervalo
+              setTimeout(() => {
+                if (inputElement) {
+                  inputElement.focus();
+                }
+              }, 100);
+            }
+          }, 150);
+          
+          // Abordagem 5: Usar o método blur() para tirar o foco do elemento
+          setTimeout(() => {
+            inputElement.blur();
+          }, 200);
+          
+        } catch (e) {
+          console.error('Erro ao aplicar texto no Google Sheets:', e);
+          
+          // Método de fallback usando clipboard e eventos de teclado
+          try {
+            // Salvar o conteúdo atual da área de transferência
+            const originalClipboard = await navigator.clipboard.readText().catch(() => '');
+            
+            // Copiar o texto melhorado para a área de transferência
+            await navigator.clipboard.writeText(improvedText);
+            
+            // Focar no elemento
+            inputElement.focus();
+            
+            // Colar na célula
+            document.execCommand('paste');
+            
+            // Simular Enter com várias abordagens
+            const enterKeyCodes = [
+              { event: 'keydown', delay: 50 },
+              { event: 'keypress', delay: 100 },
+              { event: 'keyup', delay: 150 }
+            ];
+            
+            enterKeyCodes.forEach(({ event, delay }) => {
+              setTimeout(() => {
+                const keyEvent = new KeyboardEvent(event, {
+                  bubbles: true,
+                  cancelable: true,
+                  keyCode: 13,
+                  which: 13,
+                  key: 'Enter',
+                  code: 'Enter'
+                });
+                inputElement.dispatchEvent(keyEvent);
+              }, delay);
+            });
+            
+            // Tirar o foco do elemento após um tempo
+            setTimeout(() => {
+              inputElement.blur();
+              
+              // Restaurar a área de transferência original
+              setTimeout(() => {
+                navigator.clipboard.writeText(originalClipboard).catch(() => {});
+              }, 100);
+            }, 200);
+          } catch (clipboardError) {
+            console.error('Erro ao usar clipboard:', clipboardError);
+          }
+        }
+      } else if (inputElement.tagName === 'INPUT' || inputElement.tagName === 'TEXTAREA') {
+        inputElement.value = improvedText;
+        // Disparar eventos para inputs e textareas
+        const inputEvent = new Event('input', { bubbles: true });
+        const changeEvent = new Event('change', { bubbles: true });
+        inputElement.dispatchEvent(inputEvent);
+        inputElement.dispatchEvent(changeEvent);
+      } else {
+        inputElement.innerText = improvedText;
+        // Disparar evento de input para elementos editáveis
+        const event = new Event('input', { bubbles: true });
+        inputElement.dispatchEvent(event);
       }
-      alert('Ocorreu um erro ao processar o texto.');
+    } else {
+      // Parar efeitos em caso de erro na requisição da IA
+      backgroundSound.pause();
+      backgroundSound.currentTime = 0;
+      window.isEffectActive = false;
+      completionImage.style.opacity = '0';
     }
   });
-  
+
   // Adicionar os elementos de áudio ao corpo do documento
   document.body.appendChild(backgroundSound);
   document.body.appendChild(button);
