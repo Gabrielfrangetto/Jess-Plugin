@@ -856,10 +856,13 @@ function createButton() {
   
       console.log("📨 Status da resposta:", response.status);
   
+      // Se a resposta não for bem-sucedida (não status 2xx), trata como erro
       if (!response.ok) {
-        const erro = await response.text();
-        console.error("❌ Erro recebido:", erro);
-        alert('Erro ao se conectar com a IA.');
+        const errorData = await response.json(); // Captura o erro retornado como JSON
+        console.error("❌ Erro recebido:", errorData.error); // Exibe o erro no console
+
+        // Exibe o erro diretamente para o usuário com a mensagem específica
+        alert(errorData.error || 'Erro ao se conectar com a IA.'); // Se não houver um erro específico, mostra um erro genérico
         return null;
       }
   
