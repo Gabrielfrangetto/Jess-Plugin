@@ -171,6 +171,8 @@ function createButton() {
     // Função para atualizar a posição do handle quando o botão se move
     function updateHandlePosition() {
       const rect = button.getBoundingClientRect();
+      // Usar posição fixa em vez de absoluta para o handle
+      dragHandle.style.position = 'fixed';
       dragHandle.style.left = (rect.left + rect.width / 2) + 'px';
       dragHandle.style.top = (rect.top - 10) + 'px';
     }
