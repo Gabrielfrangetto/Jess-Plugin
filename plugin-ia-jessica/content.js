@@ -529,9 +529,6 @@ function createButton() {
       return;
     }
     
-    // Remover a inicialização do som daqui, pois agora só tocará se a imagem aparecer
-    // (será iniciado dentro da função showCompletionImage)
-    
     // Criar imagens flutuantes a partir do botão
     createFloatingImages();
     
@@ -544,43 +541,40 @@ function createButton() {
     let isGoogleSheets = false;
     
     // Verificar se o elemento ativo é um input, textarea ou elemento editável
-    if (activeElement && 
-        (activeElement.tagName === 'INPUT' || 
-         activeElement.tagName === 'TEXTAREA' || 
-         activeElement.getAttribute('contenteditable') === 'true')) {
-      inputElement = activeElement;
-    } else {
-      // Verificar se estamos no Google Sheets
-      if (window.location.href.includes('docs.google.com/spreadsheets')) {
-        isGoogleSheets = true;
-        // Tentar encontrar o elemento de entrada de célula do Google Sheets
-        inputElement = document.querySelector('.cell-input');
-        
-        // Se não encontrou, tentar encontrar o elemento de edição ativo
-        if (!inputElement) {
-          inputElement = document.querySelector('.editable.selected');
-        }
-        
-        // Tentar outras classes comuns do Google Sheets
-        if (!inputElement) {
-          inputElement = document.querySelector('.active-cell-input') || 
-                         document.querySelector('.waffle-formula-input') ||
-                         document.querySelector('[role="textbox"]');
-        }
+    if (activeElement) {
+      // Verificar se é um input de texto, textarea ou elemento com contentEditable
+      if (
+        (activeElement.tagName === 'INPUT' && 
+         (activeElement.type === 'text' || activeElement.type === 'search' || activeElement.type === 'email' || 
+          activeElement.type === 'password' || activeElement.type === 'tel' || activeElement.type === 'url' || 
+          activeElement.type === '' || !activeElement.type)) || // Incluir inputs sem tipo especificado
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.getAttribute('contenteditable') === 'true' ||
+        activeElement.isContentEditable
+      ) {
+        inputElement = activeElement;
       } else {
-        // Se não houver elemento ativo, tentar encontrar o campo #mention-input (compatibilidade com plugchat)
-        inputElement = document.querySelector('#mention-input');
-      }
-      
-      // Se ainda não encontrou, procurar qualquer input ou textarea visível
-      if (!inputElement) {
-        const inputs = document.querySelectorAll('input["text"], textarea, [contenteditable="true"]');
-        if (inputs.length > 0) {
-          inputElement = inputs[0]; // Pegar o primeiro encontrado
+        // Verificar se estamos no Google Sheets (caso especial)
+        isGoogleSheets = window.location.href.includes('docs.google.com/spreadsheets');
+        
+        // Se não for um elemento de entrada padrão, procurar por elementos editáveis próximos
+        const possibleInputs = document.querySelectorAll('input[type="text"], input[type="search"], input:not([type]), textarea, [contenteditable="true"]');
+        
+        if (possibleInputs.length > 0) {
+          // Pegar o primeiro elemento de entrada encontrado
+          inputElement = possibleInputs[0];
         }
       }
     }
-
+    
+    // Se não encontrou nenhum elemento de entrada, procurar por qualquer input ou textarea na página
+    if (!inputElement && !isGoogleSheets) {
+      const inputs = document.querySelectorAll('input[type="text"], input[type="search"], input:not([type]), textarea, [contenteditable="true"]');
+      if (inputs.length > 0) {
+        inputElement = inputs[0]; // Usar o primeiro encontrado
+      }
+    }
+    
     if (!inputElement) {
       alert('Campo de texto não encontrado! Clique em um campo de texto antes de usar o botão.');
       // Parar efeitos em caso de erro
