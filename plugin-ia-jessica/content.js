@@ -463,19 +463,30 @@ function createButton() {
   // Adicionar eventos ao handle para rastrear quando o mouse está sobre ele
   dragHandle.addEventListener('mouseenter', () => {
     isMouseOverHandle = true;
+    
+    // Definir um estilo de cursor fixo para evitar o piscar
+    dragHandle.style.cursor = 'grab';
+    
+    // Adicionar uma pequena margem invisível para evitar problemas na borda
+    dragHandle.style.padding = '2px';
+    dragHandle.style.margin = '-2px';
   });
   
   dragHandle.addEventListener('mouseleave', (event) => {
-    isMouseOverHandle = false;
-    
-    // Verificar se o mouse também não está sobre o botão
-    const isMouseOverButton = document.elementFromPoint(event.clientX, event.clientY) === button;
-    
-    if (!isMouseOverButton && !isDragging) {
-      // Se o mouse não estiver sobre o botão nem sobre o handle, esconder o handle
-      dragHandle.style.opacity = '0';
-      dragHandle.style.pointerEvents = 'none'; // Desabilitar interação
-    }
+    // Adicionar um pequeno atraso para evitar piscar
+    setTimeout(() => {
+      isMouseOverHandle = false;
+      
+      // Verificar se o mouse também não está sobre o botão
+      const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
+      const isMouseOverButton = elementUnderMouse === button;
+      
+      if (!isMouseOverButton && !isDragging) {
+        // Se o mouse não estiver sobre o botão nem sobre o handle, esconder o handle
+        dragHandle.style.opacity = '0';
+        dragHandle.style.pointerEvents = 'none'; // Desabilitar interação
+      }
+    }, 50); // Pequeno atraso para evitar piscar
   });
   
   button.addEventListener('mouseleave', (event) => {
