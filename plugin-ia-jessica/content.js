@@ -114,17 +114,17 @@ function createButton() {
   // Criar o handle como um elemento separado fora do botão
   const dragHandle = document.createElement('div');
   
-  // Definir tamanho menor para o handle
-  const HANDLE_SIZE = 18; // Tamanho reduzido
+  // Definir tamanho maior para o handle
+  const HANDLE_SIZE = 25; // Aumentado para melhor usabilidade
   
   // Configurar estilos do handle
   dragHandle.style.position = 'absolute';
-  dragHandle.style.top = '-15px';
+  dragHandle.style.top = '-25px'; // Aumentado para ficar mais acima
   dragHandle.style.left = '50%';
   dragHandle.style.transform = 'translateX(-50%)';
   dragHandle.style.width = HANDLE_SIZE + 'px';
   dragHandle.style.height = HANDLE_SIZE + 'px';
-  dragHandle.style.background = '#444';
+  dragHandle.style.background = '#007bff';
   dragHandle.style.borderRadius = '50%';
   dragHandle.style.border = '2px solid #fff';
   dragHandle.style.cursor = 'grab';
@@ -139,26 +139,25 @@ function createButton() {
   dragHandle.style.transition = 'opacity 0.3s ease';
   dragHandle.style.pointerEvents = 'none'; // Inicialmente desativado
   
-  // Criar o SVG como um elemento separado para melhor controle
-  const svgContent = `
-    <svg width="${HANDLE_SIZE * 0.8}" height="${HANDLE_SIZE * 0.8}" viewBox="0 0 16 16" style="display: block;">
-      <circle cx="8" cy="8" r="7" fill="#888"/>
-      <path d="M8 4v8M4 8h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  `;
+  // Substituir o SVG pela imagem fornecida
+  const handleImage = document.createElement('img');
+  handleImage.src = 'https://gabrielfrangetto.github.io/Pluginextras/784344.png';
+  handleImage.style.width = '100%';
+  handleImage.style.height = '100%';
+  handleImage.style.objectFit = 'contain';
   
-  // Definir o conteúdo HTML do handle
-  dragHandle.innerHTML = svgContent;
+  // Adicionar a imagem ao handle
+  dragHandle.appendChild(handleImage);
   
   // Garantir que o handle não seja afetado por estilos externos
   dragHandle.setAttribute('style', 
     'position: fixed !important;' + // Mudado para fixed para melhor posicionamento
-    'top: -15px !important;' +
+    'top: -25px !important;' + // Aumentado para ficar mais acima
     'left: 50% !important;' +
     'transform: translateX(-50%) !important;' +
     'width: ' + HANDLE_SIZE + 'px !important;' +
     'height: ' + HANDLE_SIZE + 'px !important;' +
-    'background: #444 !important;' +
+    'background: #007bff !important;' + // Alterado para azul (#007bff)
     'border-radius: 50% !important;' +
     'border: 2px solid #fff !important;' +
     'cursor: grab !important;' +
@@ -169,18 +168,58 @@ function createButton() {
     'align-items: center !important;' +
     'opacity: 0 !important;' + // Inicialmente invisível
     'transition: opacity 0.3s ease !important;' + // Transição suave
-    'pointer-events: none !important;'); // Inicialmente desativado
+    'pointer-events: none !important;' + // Inicialmente desativado
+    'box-sizing: border-box !important;' + // Garantir que padding e border não afetem o tamanho
+    'padding: 0 !important;' + // Remover padding
+    'margin: 0 !important;');
   
   // Adicionar o handle ao documento, não ao botão
   document.body.appendChild(dragHandle);
   
+  // Aumentar a área de clique do handle para facilitar o uso
+  dragHandle.style.width = '30px'; // Aumentado de 25px para 30px
+  dragHandle.style.height = '30px'; // Aumentado de 25px para 30px
+  
+  // Atualizar o atributo style com !important para garantir que as alterações sejam aplicadas
+  const handleStyleString = dragHandle.getAttribute('style');
+  dragHandle.setAttribute('style', handleStyleString.replace('width: ' + HANDLE_SIZE + 'px', 'width: 30px')
+                                                  .replace('height: ' + HANDLE_SIZE + 'px', 'height: 30px'));
+  
+  // Adicionar uma área de clique invisível maior ao redor do handle
+  const handleHitArea = document.createElement('div');
+  handleHitArea.style.position = 'fixed';
+  handleHitArea.style.width = '40px';
+  handleHitArea.style.height = '40px';
+  handleHitArea.style.borderRadius = '50%';
+  handleHitArea.style.backgroundColor = 'transparent';
+  handleHitArea.style.zIndex = '10001'; // Abaixo do handle, mas acima de outros elementos
+  handleHitArea.style.pointerEvents = 'none'; // Inicialmente desativado
+  document.body.appendChild(handleHitArea);
+  
+  // Função para atualizar a posição da área de clique junto com o handle
+  function updateHitAreaPosition() {
+    const handleRect = dragHandle.getBoundingClientRect();
+    handleHitArea.style.left = (handleRect.left - 5) + 'px';
+    handleHitArea.style.top = (handleRect.top - 5) + 'px';
+  }
+  
+  // Atualizar a função updateHandlePosition para incluir a área de clique
+  const originalUpdateHandlePosition = updateHandlePosition;
+  updateHandlePosition = function() {
+    originalUpdateHandlePosition();
+    updateHitAreaPosition();
+  };
+  
   // Função para atualizar a posição do handle quando o botão se move
   function updateHandlePosition() {
     const rect = button.getBoundingClientRect();
-    // Usar posição fixa para o handle
+    // Posicionar o handle no centro superior do botão
     dragHandle.style.position = 'fixed';
     dragHandle.style.left = (rect.left + rect.width / 2) + 'px';
-    dragHandle.style.top = (rect.top - 10) + 'px';
+    dragHandle.style.top = (rect.top - 15) + 'px'; // Ajustado para ficar mais próximo do botão
+    
+    // Forçar o handle a manter sua posição relativa ao botão
+    dragHandle.style.transform = 'translateX(-50%)';
   }
   
   // Atualizar posição inicial do handle
@@ -191,6 +230,33 @@ function createButton() {
   
   // Adicionar listener para o evento de redimensionamento da janela
   window.addEventListener('resize', updateHandlePosition);
+  
+  // Também aplicar o mesmo comportamento à área de clique maior
+  handleHitArea.addEventListener('mouseenter', () => {
+    isMouseOverHandle = true;
+    clearTimeout(handleHideTimeout);
+    
+    // Garantir que o handle fique visível quando o mouse estiver sobre a área de clique
+    dragHandle.style.opacity = '1';
+    dragHandle.style.pointerEvents = 'auto';
+  });
+  
+  handleHitArea.addEventListener('mouseleave', (event) => {
+    handleHideTimeout = setTimeout(() => {
+      isMouseOverHandle = false;
+      
+      // Verificar se o mouse também não está sobre o botão e não estamos arrastando
+      const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
+      const isMouseOverButton = elementUnderMouse === button || button.contains(elementUnderMouse);
+      
+      if (!isMouseOverButton && !isDragging && !dragHandle.contains(elementUnderMouse)) {
+        // Se o mouse não estiver sobre o botão nem sobre o handle, esconder o handle
+        dragHandle.style.opacity = '0';
+        dragHandle.style.pointerEvents = 'none'; // Desabilitar interação
+        handleHitArea.style.pointerEvents = 'none'; // Desabilitar a área de clique maior
+      }
+    }, 300);
+  });
   
   // Carregar posição salva do localStorage (se existir)
   try {
@@ -250,11 +316,37 @@ function createButton() {
     isDragging = true;
     dragStarted = false;
     dragHandle.style.cursor = 'grabbing';
-    const rect = button.getBoundingClientRect();
-    dragOffsetX = e.clientX - rect.left;
-    dragOffsetY = e.clientY - rect.top;
+    
+    // Calcular o offset em relação ao botão, não ao handle
+    const buttonRect = button.getBoundingClientRect();
+    dragOffsetX = e.clientX - buttonRect.left;
+    dragOffsetY = e.clientY - buttonRect.top;
+    
+    // Garantir que o handle permaneça visível durante o arrasto
+    dragHandle.style.opacity = '1';
+    dragHandle.style.pointerEvents = 'auto';
+    handleHitArea.style.pointerEvents = 'auto';
+    
+    // Limpar qualquer timeout pendente
+    clearTimeout(handleHideTimeout);
+    
+    // Adicionar uma classe ao body para indicar que estamos arrastando
+    document.body.classList.add('nyan-cat-dragging');
+    
     e.preventDefault();
     e.stopPropagation();
+  });
+  
+  // Permitir que a área de clique maior também inicie o arrasto
+  handleHitArea.addEventListener('mousedown', function(e) {
+    // Simular clique no handle real
+    const mouseEvent = new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+      clientX: e.clientX,
+      clientY: e.clientY
+    });
+    dragHandle.dispatchEvent(mouseEvent);
   });
   
   document.addEventListener('mousemove', function(e) {
@@ -309,18 +401,31 @@ function createButton() {
     }
   });
   
-  document.addEventListener('mouseup', function() {
+  document.addEventListener('mouseup', function(event) {
     if (isDragging) {
       isDragging = false;
       dragHandle.style.cursor = 'grab';
       
-      // Verificar se o mouse ainda está sobre o botão
-      const isMouseOverButton = document.querySelector(':hover') === button;
+      // Remover a classe de arrasto
+      document.body.classList.remove('nyan-cat-dragging');
       
-      // Se o mouse não estiver mais sobre o botão, esconder o handle
-      if (!isMouseOverButton) {
-        dragHandle.style.opacity = '0';
-        dragHandle.style.pointerEvents = 'none'; // Desabilitar interação
+      // Verificar se o mouse ainda está sobre o botão ou o handle
+      const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
+      const isOverButton = elementUnderMouse === button || 
+                          (button.contains && button.contains(elementUnderMouse));
+      const isOverHandle = elementUnderMouse === dragHandle || 
+                          (dragHandle.contains && dragHandle.contains(elementUnderMouse)) ||
+                          elementUnderMouse === handleHitArea || 
+                          (handleHitArea && handleHitArea.contains && handleHitArea.contains(elementUnderMouse));
+      
+      // Atualizar as variáveis de rastreamento
+      isMouseOverButton = isOverButton;
+      isMouseOverHandle = isOverHandle;
+      
+      // Se o mouse não estiver sobre nenhum elemento, desativar os efeitos
+      if (!isOverButton && !isOverHandle) {
+        // Desativar os efeitos imediatamente após o arrasto
+        disableAllEffects();
       }
       
       // Salvar a posição final no localStorage
@@ -338,6 +443,16 @@ function createButton() {
         }
       }
     }
+  });
+  
+  // Adicionar um evento global para detectar quando o mouse sai da janela
+  document.addEventListener('mouseleave', () => {
+    // Se o mouse sair da janela, desativar todos os efeitos após um pequeno atraso
+    effectsDisableTimeout = setTimeout(() => {
+      isMouseOverButton = false;
+      isMouseOverHandle = false;
+      disableAllEffects();
+    }, 200);
   });
   
   // --- SUPORTE PARA TOUCH (DISPOSITIVOS MÓVEIS) ---
@@ -453,6 +568,12 @@ function createButton() {
     dragHandle.style.opacity = '1';
     dragHandle.style.pointerEvents = 'auto'; // Habilitar interação
     
+    // Ativar também a área de clique maior
+    handleHitArea.style.pointerEvents = 'auto';
+    
+    // Limpar qualquer timeout pendente
+    clearTimeout(handleHideTimeout);
+    
     // Iniciar o efeito RGB
     startRGBEffect();
   });
@@ -467,26 +588,29 @@ function createButton() {
     // Definir um estilo de cursor fixo para evitar o piscar
     dragHandle.style.cursor = 'grab';
     
-    // Adicionar uma pequena margem invisível para evitar problemas na borda
-    dragHandle.style.padding = '2px';
-    dragHandle.style.margin = '-2px';
+    // Impedir que o handle desapareça quando o mouse estiver sobre ele
+    clearTimeout(handleHideTimeout);
   });
   
+  // Variável para armazenar o timeout de esconder o handle
+  let handleHideTimeout;
+  
   dragHandle.addEventListener('mouseleave', (event) => {
-    // Adicionar um pequeno atraso para evitar piscar
-    setTimeout(() => {
+    // Não esconder o handle imediatamente, dar tempo para o usuário mover o mouse
+    handleHideTimeout = setTimeout(() => {
       isMouseOverHandle = false;
       
-      // Verificar se o mouse também não está sobre o botão
+      // Verificar se o mouse também não está sobre o botão e não estamos arrastando
       const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
-      const isMouseOverButton = elementUnderMouse === button;
+      const isMouseOverButton = elementUnderMouse === button || button.contains(elementUnderMouse);
       
       if (!isMouseOverButton && !isDragging) {
         // Se o mouse não estiver sobre o botão nem sobre o handle, esconder o handle
         dragHandle.style.opacity = '0';
         dragHandle.style.pointerEvents = 'none'; // Desabilitar interação
+        handleHitArea.style.pointerEvents = 'none'; // Desabilitar a área de clique maior
       }
-    }, 50); // Pequeno atraso para evitar piscar
+    }, 300); // Aumentado para 300ms para dar mais tempo ao usuário
   });
   
   button.addEventListener('mouseleave', (event) => {
@@ -681,6 +805,96 @@ function createButton() {
     }, 2000);
   }
 
+  // Adicionar evento de clique ao botão para o Google Sheets
+  button.addEventListener('click', () => {
+    // Verificar se estamos no Google Sheets
+    const isGoogleSheets = window.location.hostname.includes('docs.google.com') && 
+                          window.location.pathname.includes('/spreadsheets/');
+    
+    if (isGoogleSheets) {
+      // Verificar se há uma célula selecionada ou se estamos dentro de uma célula
+      const activeElement = document.activeElement;
+      const isInCell = activeElement && 
+                      (activeElement.classList.contains('cell-input') || 
+                       activeElement.classList.contains('waffle-cell-input'));
+      
+      // Verificar se há uma célula selecionada (mesmo que não esteja em edição)
+      const selectedCell = document.querySelector('.cell-focus') || 
+                          document.querySelector('.active-cell-border') ||
+                          document.querySelector('.cell-selection');
+      
+      if (isInCell || selectedCell) {
+        // Se estamos em uma célula ou há uma célula selecionada
+        
+        // Se estamos apenas com a célula selecionada (não em edição), simular um clique duplo
+        if (!isInCell && selectedCell) {
+          // Obter a célula selecionada
+          const cellElement = selectedCell.closest('.grid-cell') || selectedCell;
+          
+          // Tentar simular um clique duplo na célula para entrar no modo de edição
+          try {
+            // Criar e disparar um evento de clique duplo
+            const dblClickEvent = new MouseEvent('dblclick', {
+              bubbles: true,
+              cancelable: true,
+              view: window
+            });
+            cellElement.dispatchEvent(dblClickEvent);
+            
+            // Pequeno atraso para garantir que a célula entre no modo de edição
+            setTimeout(() => {
+              // Agora mostrar a imagem de conclusão
+              showCompletionImage();
+            }, 100);
+          } catch (e) {
+            console.error('Erro ao simular clique duplo:', e);
+            // Tentar mostrar a imagem mesmo assim
+            showCompletionImage();
+          }
+        } else {
+          // Se já estamos em edição, apenas mostrar a imagem
+          showCompletionImage();
+        }
+      } else {
+        // Se não houver célula selecionada, tentar encontrar a célula ativa
+        try {
+          const activeCell = document.querySelector('.active-cell-border');
+          if (activeCell) {
+            // Simular um clique na célula ativa
+            const clickEvent = new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window
+            });
+            activeCell.dispatchEvent(clickEvent);
+            
+            // Depois simular um clique duplo
+            setTimeout(() => {
+              const dblClickEvent = new MouseEvent('dblclick', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+              });
+              activeCell.dispatchEvent(dblClickEvent);
+              
+              // Mostrar a imagem após um pequeno atraso
+              setTimeout(showCompletionImage, 100);
+            }, 50);
+          } else {
+            // Se não encontrar nenhuma célula, mostrar a imagem mesmo assim
+            showCompletionImage();
+          }
+        } catch (e) {
+          console.error('Erro ao interagir com célula:', e);
+          showCompletionImage();
+        }
+      }
+    } else {
+      // Para outros sites, executar normalmente
+      showCompletionImage();
+    }
+  });
+  
   // Evento de clique principal
   button.addEventListener('click', async (event) => {
     // Se o clique foi no handle de arrastar ou se foi arrasto, não ativa IA
@@ -719,6 +933,14 @@ function createButton() {
         // Verificar se estamos no Google Sheets
         if (window.location.href.includes('docs.google.com/spreadsheets')) {
           isGoogleSheets = true;
+          // Verificar se há uma célula selecionada ou se estamos dentro de uma célula
+          const isInCell = activeElement && 
+                          (activeElement.classList.contains('cell-input') || 
+                           activeElement.classList.contains('waffle-cell-input') ||
+                           activeElement.closest('.cell-selection') ||
+                           document.querySelector('.cell-focus') ||
+                           document.querySelector('.active-cell-border'));
+          
           // Tentar encontrar o elemento de entrada de célula do Google Sheets
           inputElement = document.querySelector('.cell-input');
           
